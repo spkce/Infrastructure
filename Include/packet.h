@@ -1,4 +1,7 @@
 
+#ifndef __PACKET_H__
+#define __PACKET_H__
+
 class CPacket
 {
 public:
@@ -29,3 +32,5 @@ private:
 	
 
 };
+
+#endif //__PACKET_H__

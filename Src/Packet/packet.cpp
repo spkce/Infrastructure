@@ -1,6 +1,8 @@
 
 #include <stdio.h>
+#include <string.h>
 #include "packet.h"
+ 
 
 
 CPacket::CPacket()
@@ -30,7 +32,7 @@ int CPacket::append(char* pbuf, int len)
 
 	if (m_pTail != NULL) //非第一次添加
 	{
-		tailSurplus = capacity_size - m_pTail->use;
+		tailSurplus = Node::capacity_size - m_pTail->use;
 		if (len > tailSurplus)
 		{
 			memcpy(m_pTail->cap + m_pTail->use, p, tailSurplus);
@@ -42,15 +44,15 @@ int CPacket::append(char* pbuf, int len)
 		{
 			memcpy(m_pTail->cap + m_pTail->use, p, len);
 			p += len;
-			m_pTail->use += len
+			m_pTail->use += len;
 			return len;
 		}
 	}
 	
-	for(int i = 0; len > capacity_size*i; i++)
+	for(int i = 0; len > Node::capacity_size*i; i++)
 	{
 		nodeRise();
-		int cpyLen = (len - capacity_size*i) > capacity_size ? capacity_size : (len - capacity_size*i);
+		int cpyLen = (len - Node::capacity_size*i) > Node::capacity_size ? Node::capacity_size : (len - Node::capacity_size*i);
 		memcpy(m_pTail->cap, p, cpyLen);
 		p += cpyLen;
 		m_pTail->use += cpyLen;
@@ -59,7 +61,7 @@ int CPacket::append(char* pbuf, int len)
 	return len + tailSurplus;
 }
 
-struct Node* CPacket::nodeRise(void);
+struct CPacket::Node* CPacket::nodeRise(void)
 {
 	struct Node* temp = m_pTail;
 	m_pTail = new struct Node;

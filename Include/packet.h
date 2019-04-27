@@ -11,6 +11,7 @@ public:
 	int append(char* pbuf, int len);
 	int size() const;
 	int capacity() const;
+	char operator[](const int n);
 private:
 	struct Node
 	{
@@ -22,10 +23,11 @@ private:
 		int use;
 		struct Node* next;
 	};
-
+	//增加一个尾节点
 	struct Node* nodeRise(void);
-	int totalUse;
-	int nodeNum;
+	struct Node* getNodePos(const int n);
+	int m_totalUse;
+	int m_nodeNum;
 
 	struct Node* m_phead;
 	struct Node* m_pTail;

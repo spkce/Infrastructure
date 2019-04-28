@@ -17,7 +17,8 @@ Src
 
 TEST_DIR += \
 ./Test \
-./Test/Packet 
+./Test/Packet \
+./Test/Log 
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out
@@ -28,7 +29,9 @@ TEST_SRC = $(foreach d, ${TEST_DIR}, $(wildcard ${d}/*${FILE_TYPE}))
 
 export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC ROOT_DIR DIR_OBJ
 
-all: CHECKDIR $(DIR_SRC) $(OUT) $(TEST) End
+all: CHECKDIR $(DIR_SRC) $(OUT) End
+
+test: ECHO_TEST $(TEST)
 
 CHECKDIR:
 	@sudo mkdir -p $(DIR_OBJ)
@@ -44,10 +47,14 @@ $(OUT) : $(OBJ)
 
 #编译测试代码
 $(TEST) : $(TEST_SRC) 
-	@$(CC) $^ -o $@ $(INC) $(LIBS)
+	@$(CC) $^ -g -o $@ $(INC) $(LIBS)
 
 ECHO:
+	@echo $(INC)
 	@echo "Infrastructure compiles ..."
+
+ECHO_TEST:
+	@echo "Infrastructure test compiles ..."
 
 End:
 	@echo "compiles end "

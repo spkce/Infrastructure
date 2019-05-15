@@ -1,6 +1,8 @@
 #ifndef __SINGLETON_H__
 #define __SINGLETON_H__
 
+#include "thread.h"
+
 #undef PATTERN_SINGLETON_DECLARE
 #define PATTERN_SINGLETON_DECLARE(classname)	\
 public:											\
@@ -22,8 +24,8 @@ classname * class::instance()						\
 {												\
 	if (NULL == instance##classname.get())		\
 	{											\
-		static CMutex sm_mutex;					\
-		CGuard lock(sm_mutex##classname);		\
+		static Infra::CMutex sm_mutex;			\
+		CGuard<Infra::CMutex> guard(sm_mutex##classname);		\
 		if (NULL == instance##classname.get())	\
 		{										\
 			instanc##classname = std::auto_ptr<classname>(new classname)	\

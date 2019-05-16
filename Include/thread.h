@@ -15,7 +15,7 @@ public:
 	bool trylock();
 	bool unlock();
 private:
-	MutexInternal* m_pInternal;
+	struct MutexInternal* m_pInternal;
 };
 template <class T>
 class CGuard
@@ -31,7 +31,9 @@ public:
 	}
 private:
 	T* m_plock;
-}
+};
+
+struct ThreadInternal;
 
 class CThread 
 {
@@ -40,11 +42,13 @@ public:
 protected:
 	CThread();
 	virtual ~CThread();
-	virtual void thread_proc() = 0;
+	virtual void* thread_proc(void *arg) = 0;
 	void run();
+	bool m_bLoop;
 private:
 	bool create();
-	pthread_t m_id;
+	void destroy();
+	struct ThreadInternal* m_pInternal;
 };
 } //Infra
 

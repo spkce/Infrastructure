@@ -18,7 +18,8 @@ Src
 TEST_DIR += \
 ./Test \
 ./Test/Packet \
-./Test/Log 
+./Test/Log \
+./Test/Thread 
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out

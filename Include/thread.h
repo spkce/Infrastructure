@@ -37,15 +37,15 @@ struct ThreadInternal;
 
 class CThread 
 {
-public:
-
 protected:
 	CThread();
 	virtual ~CThread();
 	virtual void* thread_proc(void *arg) = 0;
 	void run();
-	bool m_bLoop;
+public:
+	bool isTreadRuning() const;
 private:
+	void* proc(void* arg);
 	bool create();
 	void destroy();
 	struct ThreadInternal* m_pInternal;

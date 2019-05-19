@@ -3,6 +3,8 @@
 
 extern void packet_test(void);
 extern void Log_test(void);
+extern void thread_test(void);
+
 int main()
 {
 	//printf("***************packet_test*************\n");
@@ -10,6 +12,6 @@ int main()
 	//printf("****************Log_test***************\n");
 	//Log_test();
 	printf("****************thread_test***************\n");
-	thread_tes()
+	thread_test();
 	return 0;
 }

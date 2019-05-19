@@ -48,7 +48,7 @@ $(OUT) : $(OBJ)
 
 #编译测试代码
 $(TEST) : $(TEST_SRC) 
-	@$(CC) $^ -g -o $@ $(INC) $(LIBS)
+	@$(CC) $^ -g -o $@ $(INC) $(LIBS) -lpthread
 
 ECHO:
 	@echo $(INC)

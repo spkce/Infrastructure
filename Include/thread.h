@@ -40,7 +40,7 @@ class CThread
 protected:
 	CThread();
 	virtual ~CThread();
-	virtual void* thread_proc(void *arg) = 0;
+	virtual void thread_proc(void *arg) = 0;
 	void run();
 public:
 	bool isTreadRuning() const;

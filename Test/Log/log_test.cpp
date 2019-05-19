@@ -2,5 +2,5 @@
 
 void Log_test(void)
 {
-	print_backtrace();
+	//print_backtrace();
 }

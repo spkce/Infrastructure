@@ -1,5 +1,6 @@
 
 #include "packet.h"
+#include "string.h"
 
 void packet_test(void)
 {

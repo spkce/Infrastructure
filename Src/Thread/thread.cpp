@@ -75,12 +75,15 @@ bool CThread::isTreadRuning() const
 
 void* CThread::proc(void* arg)
 {
+	printf("CThread::proc \n");
 	m_pInternal->isRuning = true;
-	while (m_pInternal->bLoop)
+	while (1)
 	{
+		printf("m_pInternal->bLoop \n");
 		thread_proc(arg);
 	}
 	m_pInternal->isRuning = false;
+	return NULL;
 }
 
 bool CThread::create()
@@ -90,6 +93,7 @@ bool CThread::create()
 		//线程已经运行
 		return false;
 	}
+	printf("create pthread error: %p \n", &CThread::proc);
 	int ret = pthread_create(&(m_pInternal->tid), NULL, (Callback)&CThread::proc, NULL);
 	if (ret)
 	{
@@ -107,11 +111,7 @@ void CThread::destroy()
 	if (m_pInternal->isRuning)
 	{
 		m_pInternal->bLoop = false;
-		while (m_pInternal->isRuning)
-		{
-			//TODO: 增加延时
-			//sleep(1);
-		}
+		pthread_join(m_pInternal->tid, NULL);
 	}
 }
 

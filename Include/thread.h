@@ -44,6 +44,7 @@ public:
 	bool isTreadRuning() const;
 	virtual void thread_proc() = 0;
 protected:
+	bool loop() const;
 	void run();
 private:
 	bool create();

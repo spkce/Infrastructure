@@ -18,18 +18,19 @@ protected:
 	void thread_proc()
 	{
 		int i = 0;
-		while(i < 100)
+		while(i < 14)
 		{
 			printf("CThreadTest::thread_proc: %d\n", i++);
 			sleep(1);
 		}
+		
 	}
 
 };
 
 void thread_test(void)
 {
-	int i = 100;
+	int i = 10;
 	CThreadTest a;
 	a.start();
 	while(i--)
@@ -37,7 +38,7 @@ void thread_test(void)
 		sleep(1);
 		printf("thread_test:%d \n",i);
 	}
-	while(1);
+	//while(1);
 	printf("thread_test retrun \n");
 }
 

@@ -15,9 +15,14 @@ public:
 	}
 protected:
 	
-	void thread_proc(void *arg)
+	void thread_proc()
 	{
-		printf("CThreadTest::thread_proc\n");
+		int i = 0;
+		while(i < 100)
+		{
+			printf("CThreadTest::thread_proc: %d\n", i++);
+			sleep(1);
+		}
 	}
 
 };

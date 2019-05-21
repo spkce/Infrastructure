@@ -40,12 +40,12 @@ class CThread
 protected:
 	CThread();
 	virtual ~CThread();
-	virtual void thread_proc(void *arg) = 0;
-	void run();
 public:
 	bool isTreadRuning() const;
+	virtual void thread_proc() = 0;
+protected:
+	void run();
 private:
-	void* proc(void* arg);
 	bool create();
 	void destroy();
 	struct ThreadInternal* m_pInternal;

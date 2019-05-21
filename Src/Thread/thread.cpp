@@ -41,18 +41,28 @@ bool CMutex::unlock()
 
 struct ThreadInternal
 {
-	pthread_t tid;
+	pthread_t handle;
 	bool bLoop;
 	bool isRuning;
+	CThread* owner;
+	static void* proc(void* arg);
 };
 
-typedef void* (*Callback)(void*);
+void* ThreadInternal::proc(void* arg)
+{
+	ThreadInternal* pInternal = (ThreadInternal*)arg;
+	pInternal->isRuning = true;
+	pInternal->owner->thread_proc();
+	pInternal->isRuning = false;
+}
+
 
 CThread::CThread()
 {
 	m_pInternal = new ThreadInternal();
 	m_pInternal->isRuning = false;
 	m_pInternal->bLoop = false;
+	m_pInternal->owner = this;
 }
 
 CThread::~CThread()
@@ -73,18 +83,6 @@ bool CThread::isTreadRuning() const
 	return m_pInternal->isRuning;
 }
 
-void* CThread::proc(void* arg)
-{
-	printf("CThread::proc \n");
-	m_pInternal->isRuning = true;
-	while (1)
-	{
-		printf("m_pInternal->bLoop \n");
-		thread_proc(arg);
-	}
-	m_pInternal->isRuning = false;
-	return NULL;
-}
 
 bool CThread::create()
 {
@@ -93,11 +91,11 @@ bool CThread::create()
 		//线程已经运行
 		return false;
 	}
-	printf("create pthread error: %p \n", &CThread::proc);
-	int ret = pthread_create(&(m_pInternal->tid), NULL, (Callback)&CThread::proc, NULL);
+	
+	int ret = pthread_create(&m_pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)m_pInternal);
 	if (ret)
 	{
-		printf("create pthread error: %d \n",ret);
+		printf("create pthread error: %d \n", ret);
 		return false;
 	}
 	else
@@ -111,7 +109,7 @@ void CThread::destroy()
 	if (m_pInternal->isRuning)
 	{
 		m_pInternal->bLoop = false;
-		pthread_join(m_pInternal->tid, NULL);
+		pthread_join(m_pInternal->handle, NULL);
 	}
 }
 

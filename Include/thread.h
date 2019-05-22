@@ -49,6 +49,7 @@ protected:
 private:
 	bool create();
 	void destroy();
+	bool isThreadOver();
 	struct ThreadInternal* m_pInternal;
 };
 } //Infra

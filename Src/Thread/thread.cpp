@@ -44,8 +44,9 @@ struct ThreadInternal
 	pthread_t handle;
 	Infra::CMutex mutex;	
 	bool bLoop;				//标示线程执行体是否循环,用户可以设置
-	bool isTreadBodyEnd;	//标示线程执行体是否执行，只能有ThreadInternal::proc设置
+	//bool isTreadBodyEnd;	//标示线程执行体是否执行，只能有ThreadInternal::proc设置
 	bool isRuning;			//标示线程是否运行,只能有CThread::create和CThread::destory可以设置
+	bool isDestoryBlock;	//标示线程退出时是否以阻塞方式退出
 	CThread* owner;
 	static void* proc(void* arg);
 };
@@ -59,6 +60,9 @@ void* ThreadInternal::proc(void* arg)
 	pInternal->mutex.unlock();
 
 	pInternal->owner->thread_proc();
+
+	pInternal->bLoop = false;
+	
 	return NULL;
 }
 
@@ -69,6 +73,7 @@ CThread::CThread()
 	m_pInternal->isRuning = false;
 	m_pInternal->bLoop = false;
 	m_pInternal->owner = this;
+	m_pInternal->isDestoryBlock = true;
 }
 
 CThread::~CThread()
@@ -115,11 +120,9 @@ bool CThread::create()
 			m_pInternal->mutex.lock();
 		}
 	}
-	
-	int ret = pthread_create(&m_pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)m_pInternal);
-	
-	m_pInternal->isRuning =	true;
-	
+	//TODO:设置线程参数
+	int ret;
+	ret = pthread_create(&m_pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)m_pInternal);
 	if (ret)
 	{
 		//线程创建失败
@@ -128,31 +131,58 @@ bool CThread::create()
 		printf("create pthread error: %d \n", ret);
 		return false;
 	}
-	else
+
+	ret = pthread_detach(m_pInternal->handle);
+	if (ret)
 	{
-		m_pInternal->mutex.unlock();
-		return true;
+		printf("detach pthread error: %d \n", ret);
 	}
 
-	//TODO:分离线程
+	m_pInternal->isRuning = true;
+	m_pInternal->mutex.unlock();
+	
+	return true;
 }
 
 void CThread::destroy()
 {
 	m_pInternal->mutex.lock();
+
+	if (isThreadOver())
+	{
+		//线程没有运行
+		m_pInternal->mutex.unlock();
+		return ;
+	}
+
+	pthread_t curTID = pthread_self(); 
+	if (pthread_equal(curTID, m_pInternal->handle))
+	{
+		//自己关闭自己
+		m_pInternal->bLoop = false;
+		m_pInternal->mutex.unlock();
+		return ;
+	}
+
 	if (m_pInternal->isRuning)
 	{
-		
-		pthread_join(m_pInternal->handle, NULL);
 		m_pInternal->bLoop = false;
-		m_pInternal->isRuning = true;
-	}
-	else
-	{
-		/* code */
+		if (m_pInternal->isDestoryBlock)
+		{
+			//使用条件变量
+			pthread_join(m_pInternal->handle, NULL);
+		}
 		
+		m_pInternal->isRuning = false;
 	}
+
 	m_pInternal->mutex.unlock();
 }
+
+bool CThread::isThreadOver()
+{
+	return !m_pInternal->isRuning && !m_pInternal->bLoop;
+}
+
 
 }//Infra

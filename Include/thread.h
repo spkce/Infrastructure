@@ -17,6 +17,7 @@ public:
 private:
 	struct MutexInternal* m_pInternal;
 };
+
 template <class T>
 class CGuard
 {
@@ -31,6 +32,21 @@ public:
 	}
 private:
 	T* m_plock;
+};
+
+struct CondInternal;
+
+class CCondSignal
+{
+public:
+	CCondSignal();
+	virtual ~CCondSignal();
+	int wait();
+	int timewait();
+	bool signal();
+	bool broadcast();
+private:
+	struct CondInternal* m_pInternal;
 };
 
 struct ThreadInternal;

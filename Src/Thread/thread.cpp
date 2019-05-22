@@ -39,10 +39,53 @@ bool CMutex::unlock()
 	return pthread_mutex_unlock(&m_pInternal->mutex) == 0 ? true : false;
 }
 
+struct CondInternal
+{
+	pthread_cond_t cond;
+	pthread_mutex_t mutex
+}
+
+
+CCondSignal::CCondSignal()
+{
+	m_pInternal = new CondInternal();
+	pthread_mutex_init(&m_pInternal->mutex, NULL);
+	pthread_cond_init(&m_pInternal->cond, NULL);
+}
+
+CCondSignal::~CCondSignal()
+{
+	pthread_cond_destroy(&m_pInternal->cond)
+	pthread_mutex_destroy(&m_pInternal->mutex);
+	delete m_pInternal;
+	m_pInternal = NULL;
+}
+
+int CCondSignal::wait()
+{
+
+}
+
+int CCondSignal::timewait()
+{
+
+}
+
+bool CCondSignal::signal()
+{
+
+}
+
+bool CCondSignal::broadcast()
+{
+
+}
+
 struct ThreadInternal
 {
 	pthread_t handle;
-	Infra::CMutex mutex;	
+	Infra::CMutex mutex;
+	//pthread_cond_t cond;	//用于阻塞方式退出
 	bool bLoop;				//标示线程执行体是否循环,用户可以设置
 	//bool isTreadBodyEnd;	//标示线程执行体是否执行，只能有ThreadInternal::proc设置
 	bool isRuning;			//标示线程是否运行,只能有CThread::create和CThread::destory可以设置

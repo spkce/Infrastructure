@@ -12,6 +12,7 @@ public:
 	CTimer();
 	virtual ~CTimer();
 private:
+	TimerInternal* m_internal;
 };
 
 

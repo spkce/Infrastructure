@@ -41,10 +41,8 @@ class CCondSignal
 public:
 	CCondSignal();
 	virtual ~CCondSignal();
-	int wait();
-	int timewait();
+	bool wait();
 	bool signal();
-	bool broadcast();
 private:
 	struct CondInternal* m_pInternal;
 };

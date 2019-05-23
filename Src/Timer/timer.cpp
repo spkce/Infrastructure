@@ -6,7 +6,7 @@ namespace Infra
 
 struct TimerInternal
 {
-	
+	char name[32];
 };
 
 

@@ -61,25 +61,21 @@ CCondSignal::~CCondSignal()
 	m_pInternal = NULL;
 }
 
-int CCondSignal::wait()
+bool CCondSignal::wait()
 {
+	pthread_mutex_lock(&m_pInternal->mutex);
+	int ret = pthread_cond_wait(&m_pInternal->cond, &m_pInternal->mutex);
+	pthread_mutex_unlock(&m_pInternal->mutex);
 
+	return ret == 0 ? true : false;
 }
 
-int CCondSignal::timewait()
-{
-
-}
 
 bool CCondSignal::signal()
 {
-
+	pthread_mutex_signal(&m_pInternal->cond) == 0 ? true : false;
 }
 
-bool CCondSignal::broadcast()
-{
-
-}
 
 struct ThreadInternal
 {

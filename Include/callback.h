@@ -4,7 +4,7 @@
 namespace Infra
 {
 
-//template<typename R, typename A,>
+//template<typename R, typename A, int N>
 
 class CCallBack
 {

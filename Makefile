@@ -19,7 +19,8 @@ TEST_DIR += \
 ./Test \
 ./Test/Packet \
 ./Test/Log \
-./Test/Thread 
+./Test/Thread \
+./Test/Link \
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out

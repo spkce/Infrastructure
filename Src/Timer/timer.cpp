@@ -1,4 +1,5 @@
 
+ #include <string.h>
 #include "timer.h"
 #include "singlenton.h"
 

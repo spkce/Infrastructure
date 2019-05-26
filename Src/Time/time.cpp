@@ -1,5 +1,5 @@
 
-
+#include "stdio.h"
 #include "time.h"
 
 namespace Infra
@@ -40,7 +40,7 @@ CData::CData(long long timeStamp)
 	else if (day < 365*3 + 1)
 	{
 		year = 2;
-		day = day - 2 * 365
+		day = day - 2 * 365;
 	}else
 	{
 		year = 3;

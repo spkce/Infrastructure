@@ -15,7 +15,7 @@ enum
 {
 	HH_MM_SS,
 	HH_MM_SS_APM,
-}
+};
 
 class CData
 {

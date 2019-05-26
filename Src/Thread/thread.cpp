@@ -42,9 +42,8 @@ bool CMutex::unlock()
 struct CondInternal
 {
 	pthread_cond_t cond;
-	pthread_mutex_t mutex
-}
-
+	pthread_mutex_t mutex;
+};
 
 CCondSignal::CCondSignal()
 {
@@ -55,7 +54,7 @@ CCondSignal::CCondSignal()
 
 CCondSignal::~CCondSignal()
 {
-	pthread_cond_destroy(&m_pInternal->cond)
+	pthread_cond_destroy(&m_pInternal->cond);
 	pthread_mutex_destroy(&m_pInternal->mutex);
 	delete m_pInternal;
 	m_pInternal = NULL;
@@ -73,7 +72,7 @@ bool CCondSignal::wait()
 
 bool CCondSignal::signal()
 {
-	pthread_mutex_signal(&m_pInternal->cond) == 0 ? true : false;
+	return pthread_cond_signal(&m_pInternal->cond) == 0 ? true : false;
 }
 
 

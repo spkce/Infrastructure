@@ -36,7 +36,7 @@ CLink::~CLink()
 
 int CLink::insert(void* payload, const unsigned int pos)
 {
-	if (m_manager.iNode != 0)
+	if (m_manager.iNode == 0)
 	{
 		return rise(payload);
 	}
@@ -64,15 +64,8 @@ int CLink::insert(void* payload, const unsigned int pos)
 	}
 	
 	//右侧连接
-	if (temp->next != NULL)
-	{
-		temp->prv = inp;
-		inp->next = temp;
-	}
-	else
-	{
-		//插入到为节点位置，前向插入走不到这里。
-	}
+	temp->prv = inp;
+	inp->next = temp;
 
 	return m_manager.iNode++;
 }

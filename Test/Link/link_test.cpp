@@ -79,4 +79,15 @@ void link_test(void)
 		}
 		printf("%d \n", link.linkSize());
 	}
+
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			link.rise((void*)(number+i));
+		}
+		printf("link.linkSize() : %d \n", link.linkSize());
+		link.releas();
+		printf("link.releas() : %d \n", link.linkSize());
+	}
+
 }

@@ -31,7 +31,7 @@ CLink::CLink()
 
 CLink::~CLink()
 {
-
+	releas();
 }
 
 int CLink::insert(void* payload, const unsigned int pos)

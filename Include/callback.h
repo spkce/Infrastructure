@@ -6,14 +6,7 @@ namespace Infra
 
 //template<typename R, typename A, int N>
 
-class CCallBack
-{
-public:
-	CCallBack();
-	virtual ~CCallBack();
-private:
 
-};
 
 
 }//Infra

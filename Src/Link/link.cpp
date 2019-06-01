@@ -153,7 +153,7 @@ void* CLink::get(const unsigned int pos)
 	return p == NULL ? NULL : p->payload;
 }
 
-int CLink::linkSize() const
+unsigned int CLink::linkSize() const
 {
 	return m_manager.iNode;
 }

@@ -45,11 +45,24 @@ bool CCallBack::attach(T* pInst, cbfun fun)
 	pInfo->instance = pInst;
 	pInfo->fun = fun;
 	m_link.rise((void*)pInfo);
+	return true;
 }
 
 bool CCallBack::detach(T* pInst, cbfun fun)
 {
+	struct AttachInfo * pInfo;
+	unsigned int i;
+	for (i = m_link.linksize(); i > 0; i--)
+	{
+		pInfo = (struct AttachInfo *)m_link.get();
+		if (pInfo->instance == pInst && pInfo->fun == fun)
+		{
+			m_link.remove((void*)&pInfo, i - 1);
+			return true;
+		}
+	}
 
+	return false;
 }
 
 

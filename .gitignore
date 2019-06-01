@@ -1,6 +1,5 @@
 /.vscode/
 /obj/
-*.code-workspace
 test.out
 lib/libInfra.a
 obj/

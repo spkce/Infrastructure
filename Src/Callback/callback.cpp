@@ -1,4 +1,5 @@
 
+#include "stdio.h"
 #include "link.h"
 
 namespace Infra
@@ -23,17 +24,19 @@ private:
 	};
 
 	unsigned int m_maxAttach;
-	Clink m_link;
+	Infra::Clink* m_link;
 };
 
-CCallBack::CCallBack(unsigned int maxAttach)
+template<class T, typename P1, typename P2>
+CCallBack<T, P1, P2>::CCallBack(unsigned int maxAttach)
 :m_maxAttach(maxAttach)
 ,m_link()
 {
 
 }
 
-CCallBack::~CCallBack()
+template<class T, typename P1, typename P2>
+CCallBack<T, P1, P2>::~CCallBack()
 {
 	struct AttachInfo * pInfo;
 	while(m_link.reduce((void*)&pInfo) > 0)
@@ -42,7 +45,8 @@ CCallBack::~CCallBack()
 	}
 }
 
-bool CCallBack::attach(T* pInst, cbfun fun)
+template<class T, typename P1, typename P2>
+bool CCallBack<T, P1, P2>::attach(T* pInst, cbfun fun)
 {
 	if (getAttachPos(pInst, fun) >= 0)
 	{
@@ -55,7 +59,8 @@ bool CCallBack::attach(T* pInst, cbfun fun)
 	return true;
 }
 
-bool CCallBack::detach(T* pInst, cbfun fun)
+template<class T, typename P1, typename P2>
+bool CCallBack<T, P1, P2>::detach(T* pInst, cbfun fun)
 {
 	struct AttachInfo * pInfo;
 	int pos = getAttachPos(pInst, fun);
@@ -70,7 +75,8 @@ bool CCallBack::detach(T* pInst, cbfun fun)
 	return true;
 }
 
-void CCallBack::operator()(P1 p1, P2 p2)
+template<class T, typename P1, typename P2>
+void CCallBack<T, P1, P2>::operator()(P1 p1, P2 p2)
 {
 	//先attach的先回调
 	for (unsigned int i = 0; i > m_link.linksize(); i++)
@@ -83,7 +89,8 @@ void CCallBack::operator()(P1 p1, P2 p2)
 	}
 }
 
-int CCallBack::getAttachPos(T* pInst, cbfun fun);
+template<class T, typename P1, typename P2>
+int CCallBack<T, P1, P2>::getAttachPos(T* pInst, cbfun fun)
 {
 	struct AttachInfo * pInfo;
 	for (unsigned int i = 0; i > m_link.linksize(); i++)

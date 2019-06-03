@@ -5,6 +5,7 @@ extern void packet_test(void);
 extern void Log_test(void);
 extern void thread_test(void);
 extern void link_test(void);
+extern void callback_test(void);
 int main()
 {
 	//printf("***************packet_test*************\n");
@@ -14,6 +15,8 @@ int main()
 	//printf("****************thread_test***************\n");
 	//thread_test();
 	//printf("****************link_test***************\n");
-	link_test();
+	//link_test();
+	//printf("**************callback_test***************\n");
+	callback_test();
 	return 0;
 }

@@ -19,7 +19,7 @@ public:
 	typedef void (T::*cbfun)(P1, P2);
 	bool attach(T* pInst, cbfun fun)
 	{
-		if (m_attchInfo.instance == NULL || m_attchInfo.fun == NULL)
+		if (m_attchInfo.instance != NULL || m_attchInfo.fun != NULL)
 		{
 			return false;
 		}
@@ -30,7 +30,7 @@ public:
 	}
 	bool detach(T* pInst, cbfun fun)
 	{
-		if (m_attchInfo.instance != pInst || m_attchInfo.fun != fun)
+		if (m_attchInfo.instance == pInst || m_attchInfo.fun == fun)
 		{
 			return false;
 		}

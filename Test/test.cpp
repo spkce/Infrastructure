@@ -16,7 +16,7 @@ int main()
 	//thread_test();
 	//printf("****************link_test***************\n");
 	//link_test();
-	//printf("**************callback_test***************\n");
+	printf("**************callback_test***************\n");
 	callback_test();
 	return 0;
 }

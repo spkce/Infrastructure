@@ -86,7 +86,7 @@ void link_test(void)
 			link.rise((void*)(number+i));
 		}
 		printf("link.linkSize() : %d \n", link.linkSize());
-		link.releas();
+		link.clear();
 		printf("link.releas() : %d \n", link.linkSize());
 	}
 

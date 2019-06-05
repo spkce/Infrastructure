@@ -158,6 +158,11 @@ unsigned int CLink::linkSize() const
 	return m_manager.iNode;
 }
 
+void CLink::clear()
+{
+	releas();
+}
+
 Node* CLink::find(const unsigned int pos)
 {
 	if (pos >= m_manager.iNode)

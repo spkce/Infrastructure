@@ -25,6 +25,7 @@ public:
 	int reduce(void** playload);
 	void* get(const unsigned int pos);
 	unsigned int linkSize() const;
+	void clear();
 private:
 	Node* find(const unsigned int pos);
 	void releas();

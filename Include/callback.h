@@ -63,7 +63,7 @@ template<class T, typename P1, typename P2>
 class CObserver
 {
 public:
-	CObserver(unsigned int maxAttach):m_maxAttach(maxAttach),m_link(NULL) {}
+	CObserver(unsigned int maxAttach):m_maxAttach(maxAttach),m_link() {}
 	virtual ~CObserver()
 	{
 		struct AttachInfo * pInfo;
@@ -112,7 +112,7 @@ public:
 	{
 		struct AttachInfo * pInfo;
 		//先attach的先回调
-		for (unsigned int i = 0; i > m_link.linkSize(); i++)
+		for (unsigned int i = 0; i < m_link.linkSize(); i++)
 		{
 			pInfo = (struct AttachInfo *)m_link.get(i);
 			if (pInfo != NULL && pInfo->instance != NULL && pInfo->fun != NULL)

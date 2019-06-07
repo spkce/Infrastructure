@@ -10,6 +10,8 @@
 public:											\
 	static classname* instance();				\
 private:										\
+	classname();								\
+	~classname();								\
 	friend class std::auto_ptr<classname>;		\
 
 
@@ -20,7 +22,7 @@ void exit##classname(void)						\
 {												\
 	instance##classname = std::auto_ptr<classname>(NULL);	\
 }												\
-classname * classname::instance()						\
+classname * classname##::instance()						\
 {												\
 	if (NULL == instance##classname.get())		\
 	{											\

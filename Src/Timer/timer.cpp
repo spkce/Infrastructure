@@ -27,9 +27,7 @@ TimerInternal::~TimerInternal()
 class CTimerManger: public CThread
 {
 	PATTERN_SINGLETON_DECLARE(CTimerManger)
-private:
-	CTimerManger();
-	~CTimerManger();
+
 };
 
 PATTERM_SINGLETON_IMPLEMENT(CTimerManger)

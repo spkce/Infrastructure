@@ -12,7 +12,7 @@ public:
 	CTimer(const char* name);
 	virtual ~CTimer();
 private:
-	TimerInternal m_internal;
+	TimerInternal* m_pInternal;
 };
 
 

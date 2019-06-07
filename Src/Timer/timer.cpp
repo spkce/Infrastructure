@@ -1,7 +1,8 @@
 
- #include <string.h>
-#include "timer.h"
+#include <string.h>
 #include "singlenton.h"
+#include "timer.h"
+
 
 namespace Infra
 {
@@ -25,16 +26,11 @@ TimerInternal::~TimerInternal()
 
 class CTimerManger: public CThread
 {
-public:
 	PATTERN_SINGLETON_DECLARE(CTimerManger)
 private:
 	CTimerManger();
 	~CTimerManger();
-public:
-
-private:
-
-}
+};
 
 PATTERM_SINGLETON_IMPLEMENT(CTimerManger)
 
@@ -49,7 +45,6 @@ CTimerManger::~CTimerManger()
 }
 
 CTimer::CTimer(const char* name)
-:m_internal(name)
 {
 
 }

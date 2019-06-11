@@ -17,7 +17,7 @@ private:										\
 
 #undef PATTERM_SINGLETON_IMPLEMENT
 #define PATTERM_SINGLETON_IMPLEMENT(classname)	\
-static std::auto_ptr<classname>	instance##classname;	\
+static std::auto_ptr<classname>	instance##classname(NULL);	\
 void exit##classname(void)						\
 {												\
 	instance##classname = std::auto_ptr<classname>(NULL);	\

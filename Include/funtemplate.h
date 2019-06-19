@@ -52,7 +52,7 @@ public:
 		m_func.memFunc.obj = horrible_cast<X*>(o);
 		m_type = typeMember;
 	}
-	\
+	
 	function(FuncPtr f)
 	{
 		m_func.funcPtr = f;

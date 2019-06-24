@@ -1,26 +1,9 @@
 
-template<class OutputClass, class InputClass>
-union horrible_union
-{
-	OutputClass.out;
-	InputClass.in;
-};
+//该文件需要多次引用，此处不能使用宏防止多次引用
+#define FUCTION_TEMPLATE INFRA_JOIN(CLASS_NAME,PARAM_NUM)
 
-template<class OutputClass, class InputClass>
-inline OutputClass horrible_cast(const InputClass input)
-{
-	horrible_union<OutputClass, InputClass> u;
-
-	typedef int ERROR_CantUseHorrible_cast[sizeof(InputClass)==sizeof(u)? 1 : -1];
-	ERROR_CantUseHorrible_cast dummy;
-	(void)dummy;
-
-	u.in = input;
-	return u.out;
-}
-
-template <typename R, typename P1, typename P2>
-class function
+template <typename R, TEMPLATE_PARAM_TYPE>
+class FUCTION_TEMPLATE
 {
 	enum
 	{
@@ -28,8 +11,8 @@ class function
 		typeMember,
 		typePointer,
 	};
-	typedef R (X::*MemFunc)(P1, P2);
-	typedef R (*FuncPtr)(P1, P2);
+	typedef R (X::*MemFunc)(PARAM_LIST);
+	typedef R (*FuncPtr)(PARAM_LIST);
 
 	union 
 	{
@@ -43,33 +26,31 @@ class function
 
 	int m_type;
 public:
-	function():m_type(typeEmpty) {};
+	FUCTION_TEMPLATE():m_type(typeEmpty) {};
 	
 	template<typename O>
-	function(R(O::*f)(P1, P2), const O * o)
+	FUCTION_TEMPLATE(R(O::*f)(PARAM_LIST), const O * o)
 	{
 		m_func.memFunc.proc = horrible_cast<MemFunc>(f);
 		m_func.memFunc.obj = horrible_cast<X*>(o);
 		m_type = typeMember;
 	}
 	
-	function(FuncPtr f)
+	FUCTION_TEMPLATE(FuncPtr f)
 	{
 		m_func.funcPtr = f;
 		m_type = typePointer;
 	}
 
-	inline R operator()(P1 p1, P2 p2)
+	inline R operator()(PARAM_LIST)
 	{
 		if (m_type == typeMember)
 		{
-			return (m_func.memFunc.obj->*m_fun.memFunc.proc)(p1, p2);
+			return (m_func.memFunc.obj->*m_fun.memFunc.proc)(PARAM_INPUT);
 		}
 		else if (m_type == typePointer)
 		{
-			return m_func.funcPtr(p1, p2)
+			return m_func.funcPtr(PARAM_INPUT)
 		}
-		
 	}
-
 };

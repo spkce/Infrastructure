@@ -12,8 +12,8 @@ namespace Infra
 template<class OutputClass, class InputClass>
 union horrible_union
 {
-	OutputClass.out;
-	InputClass.in;
+	OutputClass out;
+	InputClass in;
 };
 
 template<class OutputClass, class InputClass>

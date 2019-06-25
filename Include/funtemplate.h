@@ -1,10 +1,16 @@
 
 //该文件需要多次引用，此处不能使用宏防止多次引用
-#define FUCTION_TEMPLATE INFRA_JOIN(CLASS_NAME,PARAM_NUM)
+
+#include "def.h"
+
+#define CLASS_NAME TFuncation
+
+#define FUCTION_TEMPLATE INFRA_JOIN(CLASS_NAME, PARAM_NUM)
 
 template <typename R, TEMPLATE_PARAM_TYPE>
 class FUCTION_TEMPLATE
 {
+	class X {};
 	enum
 	{
 		typeEmpty,
@@ -46,11 +52,11 @@ public:
 	{
 		if (m_type == typeMember)
 		{
-			return (m_func.memFunc.obj->*m_fun.memFunc.proc)(PARAM_INPUT);
+			return (m_func.memFunc.obj->*m_func.memFunc.proc)(PARAM_INPUT);
 		}
 		else if (m_type == typePointer)
 		{
-			return m_func.funcPtr(PARAM_INPUT)
+			return m_func.funcPtr(PARAM_INPUT);
 		}
 	}
 };

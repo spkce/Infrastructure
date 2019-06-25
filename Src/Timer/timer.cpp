@@ -19,10 +19,9 @@ struct TimerInternal
 	unsigned int period;
 };
 
-TimerInternal::TimerInternal(const char* name)
+TimerInternal::TimerInternal()
 {
-	memset(name, 0, sizeof(name));
-	iSetTime = 0;
+
 }
 
 TimerInternal::~TimerInternal()
@@ -55,7 +54,8 @@ public:
 	TimerInternal* allocateTimer();
 	void setupTimer(TimerInternal* p);
 private:
-	void allocateIdleTimer(unsigned int n)
+	void allocateIdleTimer(unsigned int n);
+	void thread_proc();
 private:
 	CLink m_linkEmployTimer;
 	CLink m_linkIdleTimer;
@@ -81,9 +81,9 @@ CTimerManger::~CTimerManger()
 
 TimerInternal* CTimerManger::allocateTimer()
 {
-	TimerInternal* P = NULL;
+	TimerInternal* p = NULL;
 
-	if (m_linkIdleTimer == 0)
+	if (m_linkIdleTimer.linkSize() == 0)
 	{
 		allocateIdleTimer(PER_TIMER_ALLOCATE);
 	}
@@ -112,7 +112,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		if (pTemp == NULL)
 		{
 			m_linkEmployTimer.rise((void*)p);
-			m_iTotalTimer++
+			m_iTotalTimer++;
 			return ;
 		}
 
@@ -148,6 +148,12 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 		m_iTotalTimer++;
 	}
 }
+
+void CTimerManger::thread_proc()
+{
+	
+}
+
 CTimer::CTimer(const char* name)
 {
 

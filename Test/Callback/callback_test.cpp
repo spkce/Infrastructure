@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "callback.h"
 
+#include "TFuncation.h"
 
 class CTest
 {
@@ -66,6 +67,18 @@ public:
 	int m_test;
 };
 
+class CTFunctionTest
+{
+public:
+	void fun(int a, int b);
+	void dump()
+	{
+		//TFuncation1<void, int, int> ss(&CTFunctionTest::fun, this);
+
+		//ss
+	}
+};
+
 void callback_test(void)
 {
 	{
@@ -74,6 +87,11 @@ void callback_test(void)
 	}
 	{
 		CTest2 test;
+		test.dump();
+	}
+	{
+		CTFunctionTest test;
+
 		test.dump();
 	}
 }

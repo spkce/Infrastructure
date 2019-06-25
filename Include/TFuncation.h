@@ -6,14 +6,23 @@
 
 namespace Infra
 {
-#undef CLASS_NAME
 
 #undef PARAM_NUM
 #undef TEMPLATE_PARAM_TYPE
 #undef PARAM_LIST
 #undef PARAM_INPUT
 
-#define CLASS_NAME TFuncation
+
+//TFuncation1
+#define PARAM_NUM 1
+#define TEMPLATE_PARAM_TYPE typename P1
+#define PARAM_LIST P1 p1
+#define PARAM_INPUT p1
+#include "funtemplate.h"
+#undef PARAM_NUM
+#undef TEMPLATE_PARAM_TYPE
+#undef PARAM_LIST
+#undef PARAM_INPUT
 
 //TFuncation2
 #define PARAM_NUM 2
@@ -26,8 +35,6 @@ namespace Infra
 #undef PARAM_LIST
 #undef PARAM_INPUT
 
-
-#undef CLASS_NAME
 
 }////Infra
 

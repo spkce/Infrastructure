@@ -3,9 +3,7 @@
 
 #include "def.h"
 
-#define CLASS_NAME TFuncation
-
-#define FUCTION_TEMPLATE INFRA_JOIN(CLASS_NAME, PARAM_NUM)
+#define FUCTION_TEMPLATE INFRA_JOIN(TFuncation, PARAM_NUM)
 
 template <typename R, TEMPLATE_PARAM_TYPE>
 class FUCTION_TEMPLATE
@@ -48,6 +46,36 @@ public:
 		m_type = typePointer;
 	}
 
+	template<typename O>
+	bool bind(R(O::*f)(PARAM_LIST), const O * o)
+	{
+		if (m_type == typeEmpty)
+		{
+			m_func.memFunc.proc = horrible_cast<MemFunc>(f);
+			m_func.memFunc.obj = horrible_cast<X*>(o);
+			m_type = typeMember;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool bind(FuncPtr f)
+	{
+		if (m_type == typeEmpty)
+		{
+			m_func.funcPtr = f;
+			m_type = typePointer;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	inline R operator()(PARAM_LIST)
 	{
 		if (m_type == typeMember)
@@ -60,3 +88,6 @@ public:
 		}
 	}
 };
+
+#undef FUCTION_TEMPLATE
+

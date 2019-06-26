@@ -5,8 +5,9 @@
 namespace Infra
 {
 //JOIN
-#define INFRA_JOIN(X,Y) X##Y
-
+#define MACRO_JOIN(X, Y) MACRO_DO_JOIN(X, Y)
+#define MACRO_DO_JOIN(X, Y) MACRO_DO_JOIN2(X, Y)
+#define MACRO_DO_JOIN2(X, Y) X##Y
 
 //horrible_cast
 template<class OutputClass, class InputClass>

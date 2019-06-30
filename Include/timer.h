@@ -11,12 +11,15 @@ struct TimerInternal;
 class CTimer
 {
 public:
+	typedef TFuncation1<void, int> TimerProc_t;
+public:
 	CTimer(const char* name);
 	virtual ~CTimer();
-	bool setTime(unsigned int period, unsigned int delay = 0, int times = -1);
+	
+	bool setTimerAttr(TimerProc_t & proc, unsigned int period, unsigned int delay = 0, int times = -1);
+	bool setProc(TimerProc_t & proc);
 	bool run();
 	
-	typedef TFuncation1<void, int> TimerProc_t;
 private:
 	TimerInternal* m_pInternal;
 };

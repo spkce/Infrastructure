@@ -1,7 +1,9 @@
 
 #include <string.h>
+
 //#include "singlenton.h"
 #include "link.h"
+#include "ctime.h"
 #include "timer.h"
 #include "thread.h"
 
@@ -81,6 +83,8 @@ CTimerManger::CTimerManger()
 ,m_iIdleTimer(PER_TIMER_ALLOCATE)
 {
 	allocateIdleTimer(m_iIdleTimer);
+
+	run();
 }
 
 CTimerManger::~CTimerManger()
@@ -159,7 +163,10 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 
 void CTimerManger::thread_proc()
 {
-	
+	while(loop())
+	{
+		long ms = CTime::getSystemTimeNSecond() / 1000;
+	}
 }
 
 CTimer::CTimer(const char* name)
@@ -173,33 +180,39 @@ CTimer::~CTimer()
 {
 }
 
-bool CTimer::setTime(unsigned int period, unsigned int delay, int times)
+bool CTimer::setTimerAttr(TimerProc_t & proc, unsigned int period, unsigned int delay, int times)
 {
-	if (m_pInternal != NULL)
-	{
-		m_pInternal->period = period;
-		m_pInternal->delay = delay;
-		m_pInternal->times = times;
-
-		return true;
-	}
-	else
+	if (m_pInternal == NULL)
 	{
 		return false;
 	}
+	
+	m_pInternal->period = period;
+	m_pInternal->delay = delay;
+	m_pInternal->times = times;
+	m_pInternal->proc = proc;
+	return true;
+}
+
+bool CTimer::setProc(TimerProc_t & proc)
+{
+	if (m_pInternal == NULL)
+	{
+		return false;
+	}
+
+	m_pInternal->proc = proc;
 }
 
 bool CTimer::run()
 {
-	if (m_pInternal != NULL)
-	{
-		CTimerManger::instance()->setupTimer(m_pInternal);
-		return true;
-	}
-	else
+	if (m_pInternal == NULL)
 	{
 		return false;
 	}
+	
+	CTimerManger::instance()->setupTimer(m_pInternal);
+	return true;
 }
 
 } //Infra

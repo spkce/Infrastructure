@@ -78,8 +78,8 @@ public:
 
 	inline FUCTION_TEMPLATE & operator=(FUCTION_TEMPLATE & fun)
 	{
-		this->m_type = fun->m_type;
-		this->m_func = fun->m_func;
+		this->m_type = fun.m_type;
+		this->m_func = fun.m_func;
 		return *this;
 	}
 	inline R operator()(PARAM_LIST)

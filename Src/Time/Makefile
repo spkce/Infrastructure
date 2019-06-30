@@ -1,5 +1,5 @@
 
-object = time.o
+object = ctime.o
 
 SOURCES = $(wildcard *${FILE_TYPE})
 

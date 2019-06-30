@@ -1,27 +1,36 @@
 
 #include <string.h>
-#include "singlenton.h"
+//#include "singlenton.h"
 #include "link.h"
 #include "timer.h"
-
+#include "thread.h"
 
 namespace Infra
 {
 
 struct TimerInternal
 {
-	
 	TimerInternal();
 	~TimerInternal();
 	Infra::CMutex mutex;
-	char name[32];
+	CTimer::TimerProc_t proc;
+	int times;
 	unsigned int delay;
 	unsigned int period;
+	bool isIdle;
+	char name[32];
+	
 };
 
 TimerInternal::TimerInternal()
+:mutex()
+,proc()
+,times(-1)
+,delay(0)
+,period(0)
+,isIdle(true)
 {
-
+	memset(name, 0, sizeof(name));
 }
 
 TimerInternal::~TimerInternal()
@@ -60,7 +69,7 @@ private:
 	CLink m_linkEmployTimer;
 	CLink m_linkIdleTimer;
 	
-	unsigned int m_iTotalTimer;
+	unsigned int m_iWorkTimer;
 	unsigned int m_iIdleTimer;
 
 };
@@ -68,7 +77,7 @@ private:
 CTimerManger::CTimerManger()
 :m_linkEmployTimer()
 ,m_linkIdleTimer()
-,m_iTotalTimer(10)
+,m_iWorkTimer(0)
 ,m_iIdleTimer(PER_TIMER_ALLOCATE)
 {
 	allocateIdleTimer(m_iIdleTimer);
@@ -90,7 +99,6 @@ TimerInternal* CTimerManger::allocateTimer()
 
 	m_linkIdleTimer.reduce((void**)&p);
 	m_iIdleTimer--;
-	m_iTotalTimer--;
 	return p;
 }
 
@@ -112,7 +120,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		if (pTemp == NULL)
 		{
 			m_linkEmployTimer.rise((void*)p);
-			m_iTotalTimer++;
+			m_iWorkTimer++;
 			return ;
 		}
 
@@ -133,8 +141,9 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	}
 
 INSERT_TIMER:
+	p->isIdle = false;
 	m_linkEmployTimer.insert((void*)p, i);
-	m_iTotalTimer++;
+	m_iWorkTimer++;
 }
 
 void CTimerManger::allocateIdleTimer(unsigned int n)
@@ -145,7 +154,6 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 	{
 		m_linkIdleTimer.rise((void*)p);
 		m_iIdleTimer++;
-		m_iTotalTimer++;
 	}
 }
 
@@ -156,11 +164,42 @@ void CTimerManger::thread_proc()
 
 CTimer::CTimer(const char* name)
 {
+	m_pInternal = CTimerManger::instance()->allocateTimer();
 
+	strncpy(m_pInternal->name, name, sizeof(name) -1 );
 }
 
 CTimer::~CTimer()
 {
+}
+
+bool CTimer::setTime(unsigned int period, unsigned int delay, int times)
+{
+	if (m_pInternal != NULL)
+	{
+		m_pInternal->period = period;
+		m_pInternal->delay = delay;
+		m_pInternal->times = times;
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool CTimer::run()
+{
+	if (m_pInternal != NULL)
+	{
+		CTimerManger::instance()->setupTimer(m_pInternal);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 } //Infra

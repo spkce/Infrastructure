@@ -3,7 +3,7 @@
 
 #include "def.h"
 
-#define FUCTION_TEMPLATE INFRA_JOIN(TFuncation, PARAM_NUM)
+#define FUCTION_TEMPLATE MACRO_JOIN(TFuncation, PARAM_NUM)
 
 template <typename R, TEMPLATE_PARAM_TYPE>
 class FUCTION_TEMPLATE
@@ -76,6 +76,12 @@ public:
 		}
 	}
 
+	inline FUCTION_TEMPLATE & operator=(FUCTION_TEMPLATE & fun)
+	{
+		this->m_type = fun->m_type;
+		this->m_func = fun->m_func;
+		return *this;
+	}
 	inline R operator()(PARAM_LIST)
 	{
 		if (m_type == typeMember)

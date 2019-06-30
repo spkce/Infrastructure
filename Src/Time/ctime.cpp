@@ -1,6 +1,6 @@
 
 #include "stdio.h"
-#include "time.h"
+#include "ctime.h"
 #include <time.h>
 
 namespace Infra
@@ -101,7 +101,7 @@ CData::~CData()
 //time_t tv_sec; /* 秒*/
 //long tv_nsec; /* 纳秒*/
 //};
-static long CTime::getRealTimeSecond()
+long CTime::getRealTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
@@ -109,49 +109,49 @@ static long CTime::getRealTimeSecond()
 }
 
 
-static long CTime::getRealTimeNSecond()
+long CTime::getRealTimeNSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
 	return time.tv_nsec;
 }
 
-static long CTime::getSystemTimeSecond()
+long CTime::getSystemTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return time.tv_sec;
 }
 
-static long CTime::getSystemTimeNSecond()
+long CTime::getSystemTimeNSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return time.tv_nsec;
 }
 
-static long CTime::getProcessTimeSecond()
+long CTime::getProcessTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time); 
 	return time.tv_sec;
 }
 
-static long CTime::getProcessTimeNSecond()
+long CTime::getProcessTimeNSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
 	return time.tv_nsec;
 }
 
-static long CTime::getThreadTimeSecond()
+long CTime::getThreadTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_sec;
 }
 
-static long CTime::getThreadTimeNSecond()
+long CTime::getThreadTimeNSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);

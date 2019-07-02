@@ -14,9 +14,13 @@ struct TimerInternal
 {
 	TimerInternal();
 	~TimerInternal();
+	inline long getTimeout()
+	{
+		return setupTime + (delay == 0 ? period : delay)
+	}
 	Infra::CMutex mutex;
 	CTimer::TimerProc_t proc;
-	long checkTime;
+	long setupTime;
 	int times;
 	unsigned int delay;
 	unsigned int period;
@@ -29,7 +33,7 @@ TimerInternal::TimerInternal()
 :mutex()
 ,proc()
 ,times(-1)
-,checkTime(0)
+,setupTime(0)
 ,delay(0)
 ,period(0)
 ,isIdle(true)
@@ -69,6 +73,8 @@ public:
 private:
 	void allocateIdleTimer(unsigned int n);
 	void thread_proc();
+	static long getCurTime();
+
 private:
 	CLink m_linkEmployTimer;
 	CLink m_linkIdleTimer;
@@ -76,6 +82,7 @@ private:
 	unsigned int m_iWorkTimer;
 	unsigned int m_iIdleTimer;
 
+	long m_curTime;
 };
 
 CTimerManger::CTimerManger()
@@ -86,6 +93,7 @@ CTimerManger::CTimerManger()
 {
 	allocateIdleTimer(m_iIdleTimer);
 
+	m_curTime = getCurTime();
 	run();
 }
 
@@ -125,30 +133,22 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		pTemp = (TimerInternal*)m_linkEmployTimer.get(i);
 		if (pTemp == NULL)
 		{
+			p->isIdle = false;
+			p->setupTime = m_curTime;
 			m_linkEmployTimer.rise((void*)p);
 			m_iWorkTimer++;
 			return ;
 		}
-
-		if (pTemp->delay == 0)
+		
+		if (pTemp->getTimeout() - m_curTime > iTemp)
 		{
-			if (pTemp->period > iTemp)
-			{
-				goto INSERT_TIMER;
-			}
-		}
-		else
-		{
-			if (pTemp->delay > iTemp)
-			{
-				goto INSERT_TIMER;
-			}
+			goto INSERT_TIMER;
 		}
 	}
 
 INSERT_TIMER:
 	p->isIdle = false;
-	p->checkTime = CTime::getSystemTimeNSecond()
+	p->setupTime = m_curTime;
 	m_linkEmployTimer.insert((void*)p, i);
 	m_iWorkTimer++;
 }
@@ -166,10 +166,29 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 
 void CTimerManger::thread_proc()
 {
+	TimerInternal* p = NULL;
+
 	while(loop())
 	{
-		long ms = CTime::getSystemTimeNSecond() / 1000;
+		p = (TimerInternal*)m_linkEmployTimer.get(i);
+
+		m_curTime = getCurTime();
+
+		if (p->getTimeout() <= m_curTime)
+		{
+			m_linkEmployTimer.remove((void**)&p, 0);
+
+			p->proc((int)m_curTime);
+
+			//重新插入
+		}
+		
 	}
+}
+
+long CTimerManger::getCurTime()
+{
+	return CTime::getSystemTimeNSecond() / 1000;
 }
 
 CTimer::CTimer(const char* name)

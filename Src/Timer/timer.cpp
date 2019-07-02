@@ -16,6 +16,7 @@ struct TimerInternal
 	~TimerInternal();
 	Infra::CMutex mutex;
 	CTimer::TimerProc_t proc;
+	long checkTime;
 	int times;
 	unsigned int delay;
 	unsigned int period;
@@ -28,6 +29,7 @@ TimerInternal::TimerInternal()
 :mutex()
 ,proc()
 ,times(-1)
+,checkTime(0)
 ,delay(0)
 ,period(0)
 ,isIdle(true)
@@ -146,6 +148,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 
 INSERT_TIMER:
 	p->isIdle = false;
+	p->checkTime = CTime::getSystemTimeNSecond()
 	m_linkEmployTimer.insert((void*)p, i);
 	m_iWorkTimer++;
 }

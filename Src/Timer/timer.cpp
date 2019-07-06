@@ -16,7 +16,7 @@ struct TimerInternal
 	~TimerInternal();
 	inline long getTimeout()
 	{
-		return setupTime + (delay == 0 ? period : delay)
+		return setupTime + (delay == 0 ? period : delay);
 	}
 	Infra::CMutex mutex;
 	CTimer::TimerProc_t proc;
@@ -32,8 +32,8 @@ struct TimerInternal
 TimerInternal::TimerInternal()
 :mutex()
 ,proc()
-,times(-1)
 ,setupTime(0)
+,times(-1)
 ,delay(0)
 ,period(0)
 ,isIdle(true)
@@ -140,7 +140,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			return ;
 		}
 		
-		if (pTemp->getTimeout() - m_curTime > iTemp)
+		if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
 		{
 			goto INSERT_TIMER;
 		}
@@ -170,17 +170,18 @@ void CTimerManger::thread_proc()
 
 	while(loop())
 	{
-		p = (TimerInternal*)m_linkEmployTimer.get(i);
+		p = (TimerInternal*)m_linkEmployTimer.get(0);
 
 		m_curTime = getCurTime();
 
 		if (p->getTimeout() <= m_curTime)
 		{
 			m_linkEmployTimer.remove((void**)&p, 0);
-
+			m_iWorkTimer--;
 			p->proc((int)m_curTime);
 
 			//重新插入
+			setupTimer(p);
 		}
 		
 	}
@@ -224,6 +225,8 @@ bool CTimer::setProc(TimerProc_t & proc)
 	}
 
 	m_pInternal->proc = proc;
+
+	return true;
 }
 
 bool CTimer::run()

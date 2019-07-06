@@ -2,6 +2,8 @@
 #include "stdio.h"
 #include "ctime.h"
 #include <time.h>
+#include <sys/select.h>
+#include <errno.h>
 
 namespace Infra
 {
@@ -157,5 +159,15 @@ long CTime::getThreadTimeNSecond()
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_nsec;
 }
-
+void CTime::delay_ms(unsigned int ms)
+{
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = ms;
+	int err;
+	do
+	{
+		err = select(0,NULL,NULL,NULL,&tv);
+	}while (err<0 && errno==EINTR);
+}
 }//Infra

@@ -76,20 +76,23 @@ private:
 	static long getCurTime();
 
 private:
-	CLink m_linkEmployTimer;
+	CLink m_linkWorkTimer;
 	CLink m_linkIdleTimer;
 	
 	unsigned int m_iWorkTimer;
 	unsigned int m_iIdleTimer;
 
+	CMutex m_mutexWorkLink;
+
 	long m_curTime;
 };
 
 CTimerManger::CTimerManger()
-:m_linkEmployTimer()
+:m_linkWorkTimer()
 ,m_linkIdleTimer()
 ,m_iWorkTimer(0)
 ,m_iIdleTimer(PER_TIMER_ALLOCATE)
+,m_mutexWorkLink()
 {
 	allocateIdleTimer(m_iIdleTimer);
 
@@ -121,36 +124,40 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	TimerInternal* pTemp = NULL;
 	unsigned int i = 0;
 	unsigned int iTemp = (p->delay !=0) ? p->delay : p->period;
-	unsigned int iEmployLink = m_linkEmployTimer.linkSize();
+	unsigned int iEmployLink = m_linkWorkTimer.linkSize();
 
 	if (iEmployLink == 0)
 	{
-		goto INSERT_TIMER;
+		p->isIdle = false;
+		p->setupTime = m_curTime;
+		m_linkWorkTimer.insert((void*)p, i);
+		m_iWorkTimer++;
+		return;
 	}
+	
+	Infra::CGuard<Infra::CMutex> guard(&m_mutexWorkLink);
 
 	for (i = 0; i < iEmployLink; i++)
 	{
-		pTemp = (TimerInternal*)m_linkEmployTimer.get(i);
+		pTemp = (TimerInternal*)m_linkWorkTimer.get(i);
 		if (pTemp == NULL)
 		{
 			p->isIdle = false;
 			p->setupTime = m_curTime;
-			m_linkEmployTimer.rise((void*)p);
+			m_linkWorkTimer.rise((void*)p);
 			m_iWorkTimer++;
-			return ;
+			return;
 		}
 		
 		if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
 		{
-			goto INSERT_TIMER;
+			p->isIdle = false;
+			p->setupTime = m_curTime;
+			m_linkWorkTimer.insert((void*)p, i);
+			m_iWorkTimer++;
+			return;
 		}
 	}
-
-INSERT_TIMER:
-	p->isIdle = false;
-	p->setupTime = m_curTime;
-	m_linkEmployTimer.insert((void*)p, i);
-	m_iWorkTimer++;
 }
 
 void CTimerManger::allocateIdleTimer(unsigned int n)
@@ -170,16 +177,18 @@ void CTimerManger::thread_proc()
 
 	while(loop())
 	{
-		p = (TimerInternal*)m_linkEmployTimer.get(0);
+		p = (TimerInternal*)m_linkWorkTimer.get(0);
 
 		m_curTime = getCurTime();
 
 		if (p->getTimeout() <= m_curTime)
 		{
-			m_linkEmployTimer.remove((void**)&p, 0);
+			m_mutexWorkLink.lock();
+			m_linkWorkTimer.remove((void**)&p, 0);
 			m_iWorkTimer--;
+			m_mutexWorkLink.unlock();
 			p->proc((int)m_curTime);
-
+			
 			//重新插入
 			setupTimer(p);
 		}

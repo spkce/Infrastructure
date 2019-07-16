@@ -22,6 +22,7 @@ TEST_DIR += \
 ./Test/Thread \
 ./Test/Link \
 ./Test/Callback \
+./Test/Timer \
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out

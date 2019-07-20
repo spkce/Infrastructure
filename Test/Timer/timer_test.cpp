@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "timer.h"
-
+#include "ctime.h"
 class CTimerTest
 {
 public:
@@ -18,7 +18,8 @@ public:
 
 	void timer_proc(int t)
 	{
-		printf("timer_proc");
+		long lTime = Infra::CTime::getRealTimeSecond();
+		printf("timer_proc time = %d\n", lTime);
 	}
 	Infra::CTimer m_timer;
 };

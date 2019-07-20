@@ -111,11 +111,11 @@ long CTime::getRealTimeSecond()
 }
 
 
-long CTime::getRealTimeNSecond()
+long CTime::getRealTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
-	return time.tv_nsec;
+	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
 long CTime::getSystemTimeSecond()
@@ -125,11 +125,11 @@ long CTime::getSystemTimeSecond()
 	return time.tv_sec;
 }
 
-long CTime::getSystemTimeNSecond()
+long CTime::getSystemTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
-	return time.tv_nsec;
+	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
 long CTime::getProcessTimeSecond()
@@ -139,11 +139,11 @@ long CTime::getProcessTimeSecond()
 	return time.tv_sec;
 }
 
-long CTime::getProcessTimeNSecond()
+long CTime::getProcessTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
-	return time.tv_nsec;
+	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
 long CTime::getThreadTimeSecond()
@@ -153,11 +153,11 @@ long CTime::getThreadTimeSecond()
 	return time.tv_sec;
 }
 
-long CTime::getThreadTimeNSecond()
+long CTime::getThreadTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
-	return time.tv_nsec;
+	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 void CTime::delay_ms(unsigned int ms)
 {

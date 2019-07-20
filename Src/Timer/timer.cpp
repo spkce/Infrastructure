@@ -1,4 +1,5 @@
 
+#include <unistd.h>
 #include <string.h>
 
 //#include "singlenton.h"
@@ -6,6 +7,8 @@
 #include "ctime.h"
 #include "timer.h"
 #include "thread.h"
+#include "stdio.h"
+
 
 namespace Infra
 {
@@ -84,6 +87,7 @@ private:
 
 	CMutex m_mutexWorkLink;
 
+	CMutex m_mutexCurTime;
 	long m_curTime;
 };
 
@@ -93,6 +97,7 @@ CTimerManger::CTimerManger()
 ,m_iWorkTimer(0)
 ,m_iIdleTimer(PER_TIMER_ALLOCATE)
 ,m_mutexWorkLink()
+,m_mutexCurTime()
 {
 	allocateIdleTimer(m_iIdleTimer);
 
@@ -124,8 +129,15 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	TimerInternal* pTemp = NULL;
 	unsigned int i = 0;
 	unsigned int iTemp = (p->delay !=0) ? p->delay : p->period;
+	
+	Infra::CGuard<Infra::CMutex> guard(&m_mutexWorkLink);
+
 	unsigned int iEmployLink = m_linkWorkTimer.linkSize();
 
+	m_curTime = getCurTime();
+	
+	printf("setupTimer = %d ms \n", m_curTime);
+	
 	if (iEmployLink == 0)
 	{
 		p->isIdle = false;
@@ -135,7 +147,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		return;
 	}
 	
-	Infra::CGuard<Infra::CMutex> guard(&m_mutexWorkLink);
+	
 
 	for (i = 0; i < iEmployLink; i++)
 	{
@@ -175,14 +187,20 @@ void CTimerManger::thread_proc()
 {
 	TimerInternal* p = NULL;
 
+	long timeout = 0;
 	while(loop())
 	{
+		
+		m_mutexWorkLink.lock();
 		p = (TimerInternal*)m_linkWorkTimer.get(0);
+		timeout = p->getTimeout();
+		m_mutexWorkLink.unlock();
 
 		m_curTime = getCurTime();
 
-		if (p->getTimeout() <= m_curTime)
+		if (timeout <= m_curTime)
 		{
+			printf("m_curTime = %d <= Timeout =%d ms \n", m_curTime, timeout);
 			m_mutexWorkLink.lock();
 			m_linkWorkTimer.remove((void**)&p, 0);
 			m_iWorkTimer--;
@@ -192,13 +210,17 @@ void CTimerManger::thread_proc()
 			//重新插入
 			setupTimer(p);
 		}
-		
+	//else
+	//{
+	//	printf("m_curTime = %d > Timeout =%d ms \n", m_curTime, timeout);
+	//}
+		usleep(1000);
 	}
 }
 
 long CTimerManger::getCurTime()
 {
-	return CTime::getSystemTimeNSecond() / 1000;
+	return CTime::getSystemTimeMSecond();
 }
 
 CTimer::CTimer(const char* name)

@@ -86,7 +86,7 @@ private:
 	unsigned int m_iIdleTimer;
 
 	CMutex m_mutexWorkLink;
-
+	CMutex m_mutexIdleLink;
 	CMutex m_mutexCurTime;
 	long m_curTime;
 };
@@ -97,6 +97,7 @@ CTimerManger::CTimerManger()
 ,m_iWorkTimer(0)
 ,m_iIdleTimer(PER_TIMER_ALLOCATE)
 ,m_mutexWorkLink()
+,m_mutexIdleLink()
 ,m_mutexCurTime()
 {
 	allocateIdleTimer(m_iIdleTimer);
@@ -114,6 +115,7 @@ TimerInternal* CTimerManger::allocateTimer()
 {
 	TimerInternal* p = NULL;
 
+	Infra::CGuard<Infra::CMutex> guard(&m_mutexIdleLink);
 	if (m_linkIdleTimer.linkSize() == 0)
 	{
 		allocateIdleTimer(PER_TIMER_ALLOCATE);
@@ -136,6 +138,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 
 	m_curTime = getCurTime();
 	
+	//printf("setupTimer name: %s \n", p->name);
 	printf("setupTimer = %d ms \n", m_curTime);
 	
 	if (iEmployLink == 0)
@@ -143,6 +146,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		p->isIdle = false;
 		p->setupTime = m_curTime;
 		m_linkWorkTimer.insert((void*)p, i);
+		printf("i = #1 %d  \n", i);
 		m_iWorkTimer++;
 		return;
 	}
@@ -157,6 +161,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			p->isIdle = false;
 			p->setupTime = m_curTime;
 			m_linkWorkTimer.rise((void*)p);
+			printf("i = #2 %d  \n", i);
 			m_iWorkTimer++;
 			return;
 		}
@@ -166,6 +171,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			p->isIdle = false;
 			p->setupTime = m_curTime;
 			m_linkWorkTimer.insert((void*)p, i);
+			printf("i = #3 %d  \n", i);
 			m_iWorkTimer++;
 			return;
 		}
@@ -210,10 +216,7 @@ void CTimerManger::thread_proc()
 			//重新插入
 			setupTimer(p);
 		}
-	//else
-	//{
-	//	printf("m_curTime = %d > Timeout =%d ms \n", m_curTime, timeout);
-	//}
+
 		usleep(1000);
 	}
 }
@@ -227,7 +230,7 @@ CTimer::CTimer(const char* name)
 {
 	m_pInternal = CTimerManger::instance()->allocateTimer();
 
-	strncpy(m_pInternal->name, name, sizeof(name) -1 );
+	strncpy(m_pInternal->name, name, sizeof(m_pInternal->name) -1 );
 }
 
 CTimer::~CTimer()
@@ -262,11 +265,15 @@ bool CTimer::setProc(TimerProc_t & proc)
 
 bool CTimer::run()
 {
+	printf("CTimer::run \n");
 	if (m_pInternal == NULL)
 	{
+		printf("m_pInternal == NULL \n");
 		return false;
 	}
 	
+	printf("setup timer : %p \n", m_pInternal);
+
 	CTimerManger::instance()->setupTimer(m_pInternal);
 	return true;
 }

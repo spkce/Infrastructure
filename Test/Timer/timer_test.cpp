@@ -4,24 +4,34 @@
 class CTimerTest
 {
 public:
-	CTimerTest():m_timer("test")
+	CTimerTest():m_timer1("test1"),m_timer2("test2")
 	{
 
 	}
 
 	void test()
 	{
-		Infra::CTimer::TimerProc_t callback(&CTimerTest::timer_proc, this);
-		m_timer.setTimerAttr(callback, 1000);
-		m_timer.run();
+		Infra::CTimer::TimerProc_t callback1(&CTimerTest::timer_proc1, this);
+		m_timer1.setTimerAttr(callback1, 1000);
+		m_timer1.run();
+
+	//	Infra::CTimer::TimerProc_t callback2(&CTimerTest::timer_proc2, this);
+	//	m_timer2.setTimerAttr(callback2, 2000);
+	//	m_timer2.run();
 	}
 
-	void timer_proc(int t)
+	void timer_proc1(int t)
 	{
 		long lTime = Infra::CTime::getRealTimeSecond();
-		printf("timer_proc time = %d\n", lTime);
+		printf("timer_proc1 time = %d\n", lTime);
 	}
-	Infra::CTimer m_timer;
+	void timer_proc2(int t)
+	{
+		long lTime = Infra::CTime::getRealTimeSecond();
+		printf("timer_proc2 time = %d\n", lTime);
+	}
+	Infra::CTimer m_timer1;
+	Infra::CTimer m_timer2;
 };
 
 void timer_test(void)

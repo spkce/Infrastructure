@@ -27,7 +27,7 @@ classname * classname::instance()						\
 	if (NULL == instance##classname.get())		\
 	{											\
 		static Infra::CMutex sm_mutex;			\
-		Infra::CGuard<Infra::CMutex> guard(&sm_mutex);		\
+		Infra::CGuard<Infra::CMutex> guard(sm_mutex);		\
 		if (NULL == instance##classname.get())	\
 		{										\
 			instance##classname = std::auto_ptr<classname>(new classname);	\

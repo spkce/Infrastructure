@@ -22,16 +22,16 @@ template <class T>
 class CGuard
 {
 public:
-	inline CGuard(T* lock):m_plock(lock)
+	inline CGuard(T & lock):m_lock(lock)
 	{
-		m_plock->lock();
+		m_lock.lock();
 	}
 	inline ~CGuard()
 	{
-		m_plock->unlock();
+		m_lock.unlock();
 	}
 private:
-	T* m_plock;
+	T & m_lock;
 };
 
 struct CondInternal;

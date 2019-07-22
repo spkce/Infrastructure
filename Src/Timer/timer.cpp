@@ -59,7 +59,7 @@ public:
 		if (pInstance == NULL)
 		{
 			static Infra::CMutex sm_mutex;
-			Infra::CGuard<Infra::CMutex> guard(&sm_mutex);
+			Infra::CGuard<Infra::CMutex> guard(sm_mutex);
 			if (pInstance == NULL)
 			{
 				pInstance = new CTimerManger;
@@ -115,7 +115,7 @@ TimerInternal* CTimerManger::allocateTimer()
 {
 	TimerInternal* p = NULL;
 
-	Infra::CGuard<Infra::CMutex> guard(&m_mutexIdleLink);
+	Infra::CGuard<Infra::CMutex> guard(m_mutexIdleLink);
 	if (m_linkIdleTimer.linkSize() == 0)
 	{
 		allocateIdleTimer(PER_TIMER_ALLOCATE);
@@ -132,7 +132,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	unsigned int i = 0;
 	unsigned int iTemp = (p->delay !=0) ? p->delay : p->period;
 	
-	Infra::CGuard<Infra::CMutex> guard(&m_mutexWorkLink);
+	Infra::CGuard<Infra::CMutex> guard(m_mutexWorkLink);
 
 	unsigned int iEmployLink = m_linkWorkTimer.linkSize();
 

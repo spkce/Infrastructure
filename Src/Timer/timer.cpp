@@ -184,7 +184,7 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 	TimerInternal* p = new TimerInternal[n];
 	for (unsigned int i = 0; i < n; i++)
 	{
-		m_linkIdleTimer.rise((void*)p);
+		m_linkIdleTimer.rise((void*)(p + i));
 		m_iIdleTimer++;
 	}
 }

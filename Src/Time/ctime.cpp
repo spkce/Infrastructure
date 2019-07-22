@@ -91,6 +91,7 @@ CData::~CData()
 
 }
 //int clock_gettime(clockid_t clk_id,struct timespec *tp);
+//clock_gettime编译时出现未定义错误需要连接librt.so.1库  -lrt
 //参数：
 //clk_id : 检索和设置的clk_id指定的时钟时间。
 //CLOCK_REALTIME:系统实时时间,随系统实时时间改变而改变,即从UTC1970-1-1 0:0:0开始计时,

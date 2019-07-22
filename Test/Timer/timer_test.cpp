@@ -11,13 +11,14 @@ public:
 
 	void test()
 	{
+		printf("setup timer1 \n");
 		Infra::CTimer::TimerProc_t callback1(&CTimerTest::timer_proc1, this);
 		m_timer1.setTimerAttr(callback1, 1000);
 		m_timer1.run();
-
-	//	Infra::CTimer::TimerProc_t callback2(&CTimerTest::timer_proc2, this);
-	//	m_timer2.setTimerAttr(callback2, 2000);
-	//	m_timer2.run();
+		printf("setup timer2 \n");
+		Infra::CTimer::TimerProc_t callback2(&CTimerTest::timer_proc2, this);
+		m_timer2.setTimerAttr(callback2, 2000);
+		m_timer2.run();
 	}
 
 	void timer_proc1(int t)

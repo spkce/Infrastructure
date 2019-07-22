@@ -131,15 +131,15 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	TimerInternal* pTemp = NULL;
 	unsigned int i = 0;
 	unsigned int iTemp = (p->delay !=0) ? p->delay : p->period;
-	
+	printf("setupTimer name: %s \n", p->name);
 	Infra::CGuard<Infra::CMutex> guard(m_mutexWorkLink);
 
 	unsigned int iEmployLink = m_linkWorkTimer.linkSize();
 
 	m_curTime = getCurTime();
 	
-	//printf("setupTimer name: %s \n", p->name);
-	printf("setupTimer = %d ms \n", m_curTime);
+	printf("setupTimer name: %s \n", p->name);
+	printf("m_curTime = %d ms \n", m_curTime);
 	
 	if (iEmployLink == 0)
 	{
@@ -150,12 +150,12 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		m_iWorkTimer++;
 		return;
 	}
-	
-	
-
+	printf("iEmployLink = %d \n", iEmployLink);
 	for (i = 0; i < iEmployLink; i++)
 	{
+		printf("i = %d \n", i);
 		pTemp = (TimerInternal*)m_linkWorkTimer.get(i);
+		//此定时器是第一个装载
 		if (pTemp == NULL)
 		{
 			p->isIdle = false;
@@ -165,7 +165,9 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			m_iWorkTimer++;
 			return;
 		}
-		
+		printf("pTemp->getTimeout() = %d \n", pTemp->getTimeout());
+		printf("iTemp = %d \n", iTemp);
+		//按timeout时间查找位置
 		if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
 		{
 			p->isIdle = false;
@@ -176,6 +178,14 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			return;
 		}
 	}
+
+	//此定时器timeout时间最长
+	p->isIdle = false;
+	p->setupTime = m_curTime;
+	m_linkWorkTimer.rise((void*)p);
+	printf("i = #4  \n");
+	m_iWorkTimer++;
+	return;
 }
 
 void CTimerManger::allocateIdleTimer(unsigned int n)

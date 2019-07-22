@@ -199,6 +199,12 @@ void CTimerManger::thread_proc()
 		
 		m_mutexWorkLink.lock();
 		p = (TimerInternal*)m_linkWorkTimer.get(0);
+		if (p == NULL)
+		{
+			m_mutexWorkLink.unlock();
+			usleep(1000);
+			continue;
+		}
 		timeout = p->getTimeout();
 		m_mutexWorkLink.unlock();
 

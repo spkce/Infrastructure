@@ -62,3 +62,19 @@ void printd(const char *fmt, ...)
 	}
 	va_end(arg);
 }
+
+inline void setColor(int fontColor, int backgroundColor)
+{
+	fprintf(stdout,"\033[%d;%dm", fontColor, backgroundColor);
+}
+
+inline void resetColor()
+{
+	fprintf(stdout,"\033[0m");
+}
+
+void print_log(const char* fmt, int fontColor = Font_white, int backgroundColor = background_black, ...);
+{
+	setColor(fontColor, backgroundColor);
+	resetColor();
+}

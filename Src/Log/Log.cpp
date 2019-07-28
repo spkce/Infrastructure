@@ -15,7 +15,7 @@ void print_backtrace()
 	}
 }
 
-void printlog(int fc, int bc, const char* fmt, va_list args);
+inline void printlog(int fc, int bc, const char* fmt, va_list args);
 {
 	fprintf(stdout,"\033[%d;%dm", fc, bc);
 	vfprintf(stdout, fmt, args);
@@ -48,6 +48,16 @@ do{																					\
 	va_end(args);																	\
 }while(0)																			\
 
+void exprintf(int fc, int bc const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	fprintf(stdout,"\033[%d;%dm", fc, bc);
+	vfprintf(stdout, fmt, args);
+	fprintf(stdout,"\033[0m");
+	va_end(args);
+
+}
 
 CLog::CLog(int logType, std::string name, std::string ver);
 :m_logType(logType)

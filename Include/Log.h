@@ -27,6 +27,7 @@ ANSI控制码:
   \033[nC   光标右移n行     
   \033[nD   光标左移n行
 */
+void exprintf(int fc, int bc const char* fmt, ...) __attribute__((format(printf, 3, 4)));
 
 class CLog
 {

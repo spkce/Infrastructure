@@ -15,66 +15,101 @@ void print_backtrace()
 	}
 }
 
-void printd(const char *fmt, ...)
+void printlog(int fc, int bc, const char* fmt, va_list args);
 {
-	int ch;
-	va_list arg;
-	va_start(arg, fmt);
-	while (*fmt != '\0')
-	{
-		switch (*fmt)
-		{
-			case '%':            //遇到%执行switch case语句
-			{
-				if (*(fmt + 1) == 'c')//输出字符
-				{
-					ch = va_arg(arg, char);
-					putchar(ch);
-					fmt++;                //指针变量向下偏移一个单位
-				}
-				else if (*(fmt + 1) == 'd')
-				{
-					ch = va_arg(arg, char);//输出×××
-					putchar(ch);
-					fmt++;
-				}
-				else if (*(fmt + 1) == 's')//输出字符串
-				{
-					char*p = va_arg(arg, char*);
-					while (*p != '\0')
-					{
-						putchar(*p);
-						p++;
-					}
-					fmt++;                //指向头一变量的下一个字符
-				}
-				else
-				{
-					putchar('%');
-				}
-			}
-				break;
-			default:
-				putchar(*fmt);
-				break;
-		}
-		fmt++;
-	}
-	va_end(arg);
-}
-
-inline void setColor(int fontColor, int backgroundColor)
-{
-	fprintf(stdout,"\033[%d;%dm", fontColor, backgroundColor);
-}
-
-inline void resetColor()
-{
+	fprintf(stdout,"\033[%d;%dm", fc, bc);
+	vfprintf(stdout, fmt, args);
 	fprintf(stdout,"\033[0m");
 }
 
-void print_log(const char* fmt, int fontColor = Font_white, int backgroundColor = background_black, ...);
+
+#define print(lv, name, ver, fc, bc, file, line, func, fmt)							\
+do{																					\
+	if (m_printLogLevel < (lv)) break;												\
+	char buffer[8192];																\
+	buffer[8191] = 0;																\
+	int n = 0;																		\
+	switch(m_logType)																							\
+	{																											\
+		case type_fileMsg:																						\
+		n = snprintf(buffer, sizeof(buffer) - 1, "%s:%d:%s ", (file), (line), (func));							\
+		case type_modMsg:																						\
+			break;																								\
+		n = snprintf(buffer, sizeof(buffer) - 1, "[%s-%s] %s:%d:%s ", (name), (ver), (file), (line), (func));	\
+			break;																								\
+		case type_onlyLog:																						\
+		default:																								\
+			break;																								\
+	}																											\
+	strncpy(buffer + n, (fmt), sizeof(buffer) - 1 - n);								\
+	va_list args;																	\
+	va_start(args, (fmt));															\
+	printlog((fc), (bc), buffer, args)												\
+	va_end(args);																	\
+}while(0)																			\
+
+
+CLog::CLog(int logType, std::string name, std::string ver);
+:m_logType(logType)
+,m_printLogLevel(logLevel_6)
+,m_name(name)
+,m_ver(ver)
 {
-	setColor(fontColor, backgroundColor);
-	resetColor();
+
+}
+
+CLog::~CLog()
+{
+
+}
+int setLogLevel(int lv)
+{
+	int ret = m_printLogLevel;
+	m_printLogLevel = lv;
+	return ret;
+}
+
+int CLog::getLogLevel()
+{
+	return m_printLogLevel;
+}
+
+int CLog::getLogType()
+{
+	return m_logType;
+}
+
+std::string CLog::getName()
+{
+	return m_name;
+}
+
+std::string CLog::getVer()
+{
+	return m_ver;
+}
+
+void CLog::info(const char* file, int line, const char* func, const char* fmt, ...)
+{
+	print(logLevel_5, m_name.c_str(), m_ver.c_str(), Font_white, background_white, file, line, func, fmt);
+}
+
+void debug(const char* file, int line, const char* func, const char* fmt, ...)
+{
+	print(logLevel_4, m_name.c_str(), m_ver.c_str(), Font_green, background_white, file, line, func, fmt);
+}
+
+void trace(const char* file, int line, const char* func, const char* fmt, ...)
+{
+	print(logLevel_3, m_name.c_str(), m_ver.c_str(), Font_violet, background_white, file, line, func, fmt);
+}
+
+void warning(const char* file, int line, const char* func, const char* fmt, ...)
+{
+	print(logLevel_2, m_name.c_str(), m_ver.c_str(), Font_yellow, background_white, file, line, func, fmt);
+}
+
+void error(const char* file, int line, const char* func, const char* fmt, ...)
+{
+	print(logLevel_1, m_name.c_str(), m_ver.c_str(), Font_red, background_white, file, line, func, fmt);
 }

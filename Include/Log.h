@@ -28,10 +28,9 @@ ANSI控制码:
   \033[nD   光标左移n行
 */
 
-
-//#define trace(fmt,...) printf(fmt,## _VA_ARGS_)
-
-
+class CLog
+{
+public:
 	enum emFontColor
 	{
 		Font_black = 30,
@@ -43,7 +42,6 @@ ANSI控制码:
 		Font_darkGreen,
 		Font_white
 	};
-
 	enum emBackgroundColor
 	{
 		background_black = 40,
@@ -55,8 +53,47 @@ ANSI控制码:
 		background_darkGreen,
 		background_white
 	};
+	enum emLogLevel
+	{
+		logLevel_0, //关闭所有打印
+		logLevel_1,
+		logLevel_2,
+		logLevel_3,
+		logLevel_4,
+		logLevel_5
+	};
+	enum emLogType
+	{
+		type_onlyLog = 0,
+		type_fileMsg,
+		type_modMsg
+	};
+public:
+	CLog(int logType, std::string name, std::string ver);
+	~CLog();
+	int setLogLevel(int lv);
+	int getLogLevel();
+	int getLogType();
+	std::string getName();
+	std::string getVer();
 
-void print_log(const char* fmt, int fontColor = Font_white, int backgroundColor = background_black, ...);
+	//lv5
+	void info(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	//lv4
+	void debug(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	//lv3
+	void trace(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	//lv2
+	void warning(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	//lv1
+	void error(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	
+private:
+	int m_logType;
+	int m_printLogLevel;
+	std::string m_name;
+	std::string m_ver;
+};
 
 
 #endif //__LOG_H__

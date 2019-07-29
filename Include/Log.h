@@ -1,5 +1,7 @@
 #ifndef __LOG_H__
 #define __LOG_H__
+#include <string>
+
 
 void print_backtrace();
 /*
@@ -27,7 +29,7 @@ ANSI控制码:
   \033[nC   光标右移n行     
   \033[nD   光标左移n行
 */
-void exprintf(int fc, int bc const char* fmt, ...) __attribute__((format(printf, 3, 4)));
+void exprintf(int fc, int bc, const char* fmt, ...) __attribute__((format(printf, 3, 4)));
 
 class CLog
 {
@@ -79,16 +81,21 @@ public:
 	std::string getVer();
 
 	//lv5
-	void info(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	void _info(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
 	//lv4
-	void debug(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	void _debug(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
 	//lv3
-	void trace(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	void _trace(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
 	//lv2
-	void warning(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	void _warning(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
 	//lv1
-	void error(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
+	void _error(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 5, 6)));
 	
+	#define info(fmt, ...) _info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+	#define debug(fmt, ...) _debug(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+	#define trace(fmt, ...) _trace(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+	#define warning(fmt, ...) _warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+	#define error(fmt, ...) _error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 private:
 	int m_logType;
 	int m_printLogLevel;
@@ -96,5 +103,21 @@ private:
 	std::string m_ver;
 };
 
+
+class CGlobalLog
+{
+public:
+	static CLog* instance();
+private:
+	CGlobalLog();
+	~CGlobalLog();
+public:
+};
+
+#define Info(fmt, ...) CGlobalLog::instance()->_info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Debug(fmt, ...) CGlobalLog::instance()->_debug(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Trace(fmt, ...) CGlobalLog::instance()->_trace(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Warning(fmt, ...) CGlobalLog::instance()->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Error(fmt, ...) CGlobalLog::instance()->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 
 #endif //__LOG_H__

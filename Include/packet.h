@@ -7,9 +7,11 @@ class CPacket
 {
 public:
 	CPacket();
+	CPacket(unsigned int size);
 	virtual ~CPacket();
 public:
-	int append(char* pbuf, int len);
+	bool append(const char* pbuf, int len);
+	char* getBuffer();
 	int size() const;
 	int capacity() const;
 	char operator[](const int n);
@@ -22,16 +24,28 @@ private:
 		};
 		char cap[capacity_size];
 		int use;
-		struct Node* next;
+		Node* next;
+	public:
+		Node()
+		{
+			next = NULL;
+			use = 0;
+			memset(cap, 0, capacity_size);
+		}
 	};
-	//增加一个尾节点
-	struct Node* nodeRise(void);
-	struct Node* getNodePos(const int n);
-	int m_totalUse;
-	int m_nodeNum;
 
-	struct Node* m_phead;
-	struct Node* m_pTail;
+	typedef struct Node Node_t;
+
+	//增加一个尾节点
+	Node_t* riseNode(void);
+	Node_t* getNodePos(const int n);
+	int m_iTotalLen;
+	int m_iNode;
+
+	Node_t* m_pHead;
+	Node_t* m_pTail;
+	Node_t* m_pCurNode;
+	Node_t* m_pBuffer;
 	
 
 };

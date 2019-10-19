@@ -3,7 +3,12 @@
 #include <string.h>
 #include "packet.h"
  
-
+CPacket::Node::Node()
+{
+	next = NULL;
+	use = 0;
+	memset(cap, 0, capacity);
+}
 
 CPacket::CPacket()
 :m_iTotalLen(0)
@@ -28,7 +33,7 @@ CPacket::CPacket(unsigned int size)
 	{
 		m_pHead = riseNode();
 		m_pCurNode = m_pHead;
-		for (int i = 0; i< size / Node::capacity_size, i++)
+		for (unsigned int i = 0; i < size / Node::capacity; i++)
 		{
 			riseNode();
 		}
@@ -47,7 +52,7 @@ int CPacket::size() const
 
 int CPacket::capacity() const
 {
-	return m_iNode * Node::capacity_size;
+	return m_iNode * Node::capacity;
 }
 
 bool CPacket::append(const char* pbuf, int len)
@@ -64,7 +69,7 @@ bool CPacket::append(const char* pbuf, int len)
 		m_pCurNode = m_pHead;
 	}
 	
-	int iCopyLen = m_pCurNode->capacity_size - m_pCurNode->use;
+	int iCopyLen = m_pCurNode->capacity - m_pCurNode->use;
 
 	if (iCopyLen >= len)
 	{
@@ -74,7 +79,7 @@ bool CPacket::append(const char* pbuf, int len)
 	else
 	{
 		memcpy(m_pCurNode->cap + m_pCurNode->use, p, iCopyLen);
-		m_pCurNode->use = m_pCurNode->capacity_size;
+		m_pCurNode->use = m_pCurNode->capacity;
 		p += iCopyLen;
 		m_iTotalLen += iCopyLen;
 
@@ -92,7 +97,7 @@ bool CPacket::append(const char* pbuf, int len)
 				m_pCurNode = m_pCurNode->next;
 			}
 
-			iCopyLen = len > m_pCurNode->capacity_size ? m_pCurNode->capacity_size : len;
+			iCopyLen = len > m_pCurNode->capacity ? m_pCurNode->capacity : len;
 			memcpy(m_pCurNode->cap, p, iCopyLen);
 			len -= iCopyLen;
 			m_iTotalLen += iCopyLen;
@@ -133,7 +138,7 @@ char* CPacket::getBuffer()
 	{
 		memcpy(pBuf, p->cap, p->use);
 		pBuf += p->use;
-		if (p->use != Node::capacity_size)
+		if (p->use != Node::capacity)
 		{
 			break;
 		}
@@ -143,12 +148,12 @@ char* CPacket::getBuffer()
 	return m_pBuffer;
 }
 
-struct CPacket::Node* CPacket::riseNode(void)
+CPacket::Node_t* CPacket::riseNode(void)
 {
 	Node_t* p = new Node_t;
 	if(p == NULL)
 	{
-		return false;
+		return NULL;
 	}
 	
 	if (m_pTail == NULL)
@@ -162,7 +167,7 @@ struct CPacket::Node* CPacket::riseNode(void)
 	
 }
 
-struct CPacket::Node* CPacket::getNodePos(int n)
+CPacket::Node_t* CPacket::getNodePos(int n)
 {
 	//n从0开始计数， m_iNode从1开始计数
 	if (n >= m_iNode || n < 0)
@@ -183,12 +188,10 @@ struct CPacket::Node* CPacket::getNodePos(int n)
 
 char CPacket::operator[](const int n)
 {
-	int nodePos = n / Node::capacity_size;
-	int nPos = n % Node::capacity_size;
+	int nodePos = n / Node::capacity;
+	int nPos = n % Node::capacity;
 
 	CPacket::Node* temp = getNodePos(nodePos);
 	
 	return temp->cap[nPos];
-
-	
 }

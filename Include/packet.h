@@ -20,18 +20,13 @@ private:
 	{
 		enum
 		{
-			capacity_size = 4*1024
+			capacity = 4*1024
 		};
-		char cap[capacity_size];
+		char cap[capacity];
 		int use;
 		Node* next;
 	public:
-		Node()
-		{
-			next = NULL;
-			use = 0;
-			memset(cap, 0, capacity_size);
-		}
+		Node();
 	};
 
 	typedef struct Node Node_t;
@@ -45,9 +40,7 @@ private:
 	Node_t* m_pHead;
 	Node_t* m_pTail;
 	Node_t* m_pCurNode;
-	Node_t* m_pBuffer;
-	
-
+	char* m_pBuffer;
 };
 
 #endif //__PACKET_H__

@@ -58,6 +58,7 @@ ECHO:
 	@echo "Infrastructure compiles ..."
 
 ECHO_TEST:
+	@echo $(TEST_SRC) $(LIBS) $(INC)
 	@echo "Infrastructure test compiles ..."
 
 End:

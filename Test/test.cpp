@@ -1,7 +1,7 @@
 #include <stdio.h>
 
+#include "packet/packet_test.h"
 
-extern void packet_test(void);
 extern void Log_test(void);
 extern void thread_test(void);
 extern void link_test(void);

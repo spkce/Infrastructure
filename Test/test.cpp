@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "packet/packet_test.h"
 
 extern void Log_test(void);
 extern void thread_test(void);

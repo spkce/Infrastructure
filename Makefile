@@ -33,7 +33,7 @@ TEST_SRC = $(foreach d, ${TEST_DIR}, $(wildcard ${d}/*${FILE_TYPE}))
 
 export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC ROOT_DIR DIR_OBJ
 
-all: CHECKDIR $(DIR_SRC) $(OUT) End
+all: CHECKDIR $(OUT) End
 
 test: ECHO_TEST $(TEST)
 
@@ -46,8 +46,8 @@ $(DIR_SRC) : ECHO
 	@make $(MAKE_CFLAGS) -C $@
 
 #生成静态库
-$(OUT) : $(OBJ)
-	@$(AR) rcs $@ $^
+$(OUT) : $(DIR_SRC)
+	@$(AR) rcs $@ $(OBJ)
 
 #编译测试代码
 $(TEST) : $(TEST_SRC) 

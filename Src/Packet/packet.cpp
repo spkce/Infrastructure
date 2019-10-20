@@ -42,7 +42,18 @@ CPacket::CPacket(unsigned int size)
 
 CPacket::~CPacket()
 {
+	Node_t* p = NULL;
+	while (m_pHead != NULL)
+	{
+		p = m_pHead->next;
+		delete m_pHead;
+		m_pHead = p;
+	}
 
+	if (m_pBuffer != NULL)
+	{
+		delete [] m_pBuffer
+	}
 }
 
 int CPacket::size() const

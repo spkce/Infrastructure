@@ -54,6 +54,7 @@ CPacket::~CPacket()
 	{
 		delete [] m_pBuffer
 	}
+	m_pBuffer = NULL;
 }
 
 int CPacket::size() const
@@ -115,6 +116,27 @@ bool CPacket::append(const char* pbuf, int len)
 		}
 	}
 	return true;
+}
+
+void CPacket::clear()
+{
+	Node_t* p = NULL;
+	while (m_pHead != NULL)
+	{
+		p = m_pHead->next;
+		delete m_pHead;
+		m_pHead = p;
+	}
+
+	if (m_pBuffer != NULL)
+	{
+		delete [] m_pBuffer
+	}
+	m_pBuffer = NULL;
+	m_pTail = NULL;
+	m_pCurNode = NULL;
+	m_iTotalLen = NULL;
+	m_iNode = NULL;
 }
 
 char* CPacket::getBuffer()

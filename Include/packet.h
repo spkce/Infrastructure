@@ -12,6 +12,7 @@ public:
 public:
 	bool append(const char* pbuf, int len);
 	char* getBuffer();
+	void clear();
 	int size() const;
 	int capacity() const;
 	char operator[](const int n);

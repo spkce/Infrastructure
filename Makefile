@@ -4,50 +4,68 @@ CC = g++
 AR = ar
 FILE_TYPE = .cpp
 CFLAGS = -Wall
+MAKE_CFLAGS = --no-print-directory
 
-INC = -I./Include
+ROOT_DIR = $(shell pwd)
+DIR_OBJ = ./obj
+DIR_LIB = ./lib
+INC = -I$(ROOT_DIR)/Include
 
+#make -C xx ：路径不能使用./xx格式
 DIR_SRC += \
-./Src/Packet \
-./Src/Timer
+Src
 
 TEST_DIR += \
 ./Test \
-./Test/Packet 
+./Test/Packet \
+./Test/Log \
+./Test/Thread \
+./Test/Link \
+./Test/Callback \
+./Test/Timer \
 
-DIR_OBJ = obj
+OUT = $(DIR_LIB)/libInfra.a
+TEST = test.out
+LIBS = -L$(DIR_LIB) -lInfra
 
-SRC += $(foreach d, ${DIR_SRC}, $(wildcard ${d}/*${FILE_TYPE}))
+OBJ = $(wildcard ${DIR_OBJ}/*.o)
 TEST_SRC = $(foreach d, ${TEST_DIR}, $(wildcard ${d}/*${FILE_TYPE}))
-SRC_FLIE = $(notdir ${SRC})
-OBJ = $(patsubst %${FILE_TYPE},${DIR_OBJ}/%.o,${SRC_FLIE})
-LIB_PATH = ./lib
-OUT = ./lib/libInfra.a
-TEST = ./test.out
-LIBS = -L$(LIB_PATH) -lInfra
 
+export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC ROOT_DIR DIR_OBJ
 
-all:ECHO $(OBJ) $(OUT) $(TEST)
+all: CHECKDIR $(OUT) End
 
+test: ECHO_TEST $(TEST)
 
-$(OBJ):$(SRC)
+CHECKDIR:
 	@sudo mkdir -p $(DIR_OBJ)
-	@$(CC) -c $(CFLAGS) $^ -o $@ $(INC)
+	@sudo mkdir -p $(DIR_LIB)
 
-$(OUT):$(OBJ)
-	@sudo mkdir -p $(LIB_PATH)
-	@$(AR) rcs $(OUT) $(OBJ)
+#递归编译各个模块
+$(DIR_SRC) : ECHO
+	@make $(MAKE_CFLAGS) -C $@
 
-$(TEST):$(TEST_SRC)
-	$(CC) $^ -o $@ $(INC) $(LIBS)
+#生成静态库
+$(OUT) : $(DIR_SRC)
+	@$(AR) rcs $@ $(OBJ)
+
+#编译测试代码
+$(TEST) : $(TEST_SRC) 
+	@$(CC) $^ -g -o $@ $(INC) $(LIBS) -lpthread
 
 ECHO:
-	@echo $(DIR_SRC)
-	@echo $(SRC)
-	@echo $(SRC_FLIE)
-	@echo $(OBJ)
+	@echo $(INC)
+	@echo "Infrastructure compiles ..."
+
+ECHO_TEST:
+	@echo $(TEST_SRC) $(LIBS) $(INC)
+	@echo "Infrastructure test compiles ..."
+
+End:
+	@echo "compiles end "
+	@echo "CFLAGS = " $(CFLAGS)
 
 clean:
 	@sudo rm -rf ${DIR_OBJ}
-	@sudo rm -rf ${LIB_PATH}
+	@sudo rm -rf ${DIR_LIB}
 	@sudo rm $(TEST)

@@ -1,2 +1,5 @@
 /.vscode/
-*.code-workspace
+/obj/
+test.out
+lib/libInfra.a
+obj/

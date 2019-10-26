@@ -4,7 +4,7 @@
 #include <string.h>
 
 
-char* StrParser::memMem(char* pBuf, int len, char* pSub, int subLen)
+char* CStrParser::memMem(char* pBuf, int len, char* pSub, int subLen)
 {
 	if (pBuf == NULL || pSub == NULL || len == 0 ||subLen == 0)
 	{
@@ -21,7 +21,7 @@ char* StrParser::memMem(char* pBuf, int len, char* pSub, int subLen)
 		return pos;
 	}
 }
-char* StrParser::skipCut(char** pBuf, const char *delimiters)
+char* CStrParser::skipCut(char** pBuf, const char *delimiters)
 {
 	char* bengin_word = *pBuf;
 	char* end_word = bengin_word + strcspn(bengin_word, delimiters);

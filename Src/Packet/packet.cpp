@@ -52,9 +52,13 @@ CPacket::~CPacket()
 
 	if (m_pBuffer != NULL)
 	{
-		delete [] m_pBuffer
+		delete [] m_pBuffer;
 	}
 	m_pBuffer = NULL;
+	m_pTail = NULL;
+	m_pCurNode = NULL;
+	m_iTotalLen = 0;
+	m_iNode = 0;
 }
 
 int CPacket::size() const
@@ -130,13 +134,13 @@ void CPacket::clear()
 
 	if (m_pBuffer != NULL)
 	{
-		delete [] m_pBuffer
+		delete [] m_pBuffer;
 	}
 	m_pBuffer = NULL;
 	m_pTail = NULL;
 	m_pCurNode = NULL;
-	m_iTotalLen = NULL;
-	m_iNode = NULL;
+	m_iTotalLen = 0;
+	m_iNode = 0;
 }
 
 char* CPacket::getBuffer()

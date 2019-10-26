@@ -11,7 +11,7 @@ char* StrParser::memMem(char* pBuf, int len, char* pSub, int subLen)
 		return NULL;
 	}
 
-	char* pos == std::search(pBuf, pBuf + len, pSub, pSub + subLen);
+	char* pos = std::search(pBuf, pBuf + len, pSub, pSub + subLen);
 	if (pos == pBuf + len)
 	{
 		return NULL;

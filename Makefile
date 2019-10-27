@@ -68,4 +68,7 @@ End:
 clean:
 	@sudo rm -rf ${DIR_OBJ}
 	@sudo rm -rf ${DIR_LIB}
+#ifeq必须顶格
+ifeq ($(TEST), $(wildcard $(TEST)))
 	@sudo rm $(TEST)
+endif

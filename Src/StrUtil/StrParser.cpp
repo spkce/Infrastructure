@@ -21,6 +21,7 @@ char* CStrParser::memMem(char* pBuf, int len, char* pSub, int subLen)
 		return pos;
 	}
 }
+
 char* CStrParser::skipCut(char** pBuf, const char *delimiters)
 {
 	char* bengin_word = *pBuf;

@@ -2,6 +2,8 @@
 #include <pthread.h>
 #include "thread.h"
 #include "stdio.h"
+#include <string.h>
+#include <errno.h>
 
 namespace Infra
 {
@@ -75,32 +77,70 @@ bool CCondSignal::signal()
 	return pthread_cond_signal(&m_pInternal->cond) == 0 ? true : false;
 }
 
+enum 
+{
+	THREAD_INIT,
+	THREAD_READY,
+	THREAD_SUSPEND,
+	THREAD_EXCUTE,
+	THREAD_WORK,
+	THREAD_EXIT,
+};
 
 struct ThreadInternal
 {
 	pthread_t handle;
 	Infra::CMutex mutex;
-	//pthread_cond_t cond;	//用于阻塞方式退出
-	bool bLoop;				//标示线程执行体是否循环,用户可以设置
-	//bool isTreadBodyEnd;	//标示线程执行体是否执行，只能有ThreadInternal::proc设置
-	bool isRuning;			//标示线程是否运行,只能有CThread::create和CThread::destory可以设置
+	Infra::CCondSignal cond;//用于线程的挂起
+	bool bLoop;				//线程执行体是否循环,由用户设置
+	bool bExit;				//线程执行体退出,由用户设置
+	bool bSuspend;			//线程暂停函数,由用户设置true,执行体设置false
 	bool isDestoryBlock;	//标示线程退出时是否以阻塞方式退出
+	int state;				//线程状态,由proc设置
 	CThread* owner;
 	static void* proc(void* arg);
 };
 
 void* ThreadInternal::proc(void* arg)
 {
+	bool isLoop = false;
+	bool isExit = false;
+	bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
-	
-	pInternal->mutex.lock();
-	pInternal->bLoop = true;
-	pInternal->mutex.unlock();
 
-	pInternal->owner->thread_proc();
+	pInternal->state = THREAD_EXCUTE;
+	printf("\033[40;35m""%s:%d %s ""\033[0m\n",__FILE__, __LINE__, __FUNCTION__);
+	do
+	{
+		pInternal->mutex.lock();
+		isExit = pInternal->bExit;
+		isSuspend = pInternal->bSuspend;
+		pInternal->mutex.unlock();
+		
+		if (isExit)
+		{
+			break;
+		}
 
-	pInternal->bLoop = false;
+		if (isSuspend)
+		{
+			pInternal->state = THREAD_SUSPEND;
+			pInternal->cond.wait();
+			pInternal->state = THREAD_EXCUTE;
+			continue;
+		}
+		
+		pInternal->state = THREAD_WORK;
+		pInternal->owner->thread_proc();
+		pInternal->state = THREAD_EXCUTE;
+
+		pInternal->mutex.lock();
+		isLoop = pInternal->bLoop;
+		pInternal->mutex.unlock();
+	} while (isLoop);
 	
+	pInternal->state = THREAD_EXIT;
+
 	return NULL;
 }
 
@@ -108,15 +148,19 @@ void* ThreadInternal::proc(void* arg)
 CThread::CThread()
 {
 	m_pInternal = new ThreadInternal();
-	m_pInternal->isRuning = false;
 	m_pInternal->bLoop = false;
+	m_pInternal->bExit = false;
+	m_pInternal->bSuspend = true;
+	m_pInternal->state = THREAD_INIT;
 	m_pInternal->owner = this;
 	m_pInternal->isDestoryBlock = true;
+
+	create();
 }
 
 CThread::~CThread()
 {
-	destroy();
+	stop();
 	
 	delete m_pInternal;
 	m_pInternal = NULL;
@@ -127,100 +171,120 @@ bool CThread::loop() const
 	return m_pInternal->bLoop;
 }
 
-void CThread::run()
+void CThread::run(bool isLoop)
 {
-	create();
+	printf("\033[40;35m""%s:%d %s ""\033[0m\n",__FILE__, __LINE__, __FUNCTION__);
+	if (m_pInternal->state == THREAD_EXIT)
+	{
+		return ;
+	}
+	m_pInternal->mutex.lock();
+	m_pInternal->bLoop = isLoop;
+	m_pInternal->bSuspend = false;
+	m_pInternal->mutex.unlock();
+
+	if (m_pInternal->state == THREAD_SUSPEND)
+	{
+		m_pInternal->cond.signal();
+	}
 }
 
-bool CThread::isTreadRuning() const
+void CThread::suspend()
 {
-	return m_pInternal->isRuning;
+	if (m_pInternal->state == THREAD_EXCUTE || m_pInternal->state == THREAD_WORK)
+	{
+		m_pInternal->mutex.lock();
+		m_pInternal->bSuspend = true;
+		m_pInternal->mutex.unlock();
+	}
+
+	while (m_pInternal->state != THREAD_SUSPEND)
+	{
+		sleep(1); //暂定1s
+	}
+	
+}
+
+void CThread::pasue()
+{
+	if (m_pInternal->state == THREAD_SUSPEND)
+	{
+		m_pInternal->mutex.lock();
+		m_pInternal->bSuspend = false;
+		m_pInternal->mutex.unlock();
+		
+		m_pInternal->cond.signal();
+	}
+}
+
+void CThread::stop()
+{
+	if (m_pInternal->state == THREAD_INIT || m_pInternal->state == THREAD_EXIT)
+	{
+		return;
+	}
+
+	m_pInternal->mutex.lock();
+	m_pInternal->bExit = true;
+	m_pInternal->bLoop = false;
+	m_pInternal->mutex.unlock();
+
+	pthread_t curTID = pthread_self(); 
+	if (pthread_equal(curTID, m_pInternal->handle))
+	{
+		//此函數由线程执行体调用，不等待直接退出
+		return ;
+	}
+
+	if (m_pInternal->state == THREAD_SUSPEND || m_pInternal->state == THREAD_READY)
+	{
+		m_pInternal->cond.signal();
+	}
+
+	if (m_pInternal->isDestoryBlock)
+	{
+		//使用条件变量，等待线程退出
+		pthread_join(m_pInternal->handle, NULL);
+	}
+}
+
+bool CThread::isTreadCreated() const
+{
+	return m_pInternal->state >= THREAD_READY;
 }
 
 
 bool CThread::create()
 {
-	m_pInternal->mutex.lock();
-	if (m_pInternal->isRuning)
+	if (isTreadCreated())
 	{
-		m_pInternal->mutex.unlock();
 		//线程已经运行
 		return false;
 	}
-
-	if(!m_pInternal->bLoop)
-	{
-		while (m_pInternal->isRuning)
-		{
-			//此时说明线程真正退出,等待线程退出
-			m_pInternal->mutex.unlock();
-			sleep(1); //TODO:考虑更短延时
-			m_pInternal->mutex.lock();
-		}
-	}
+	
 	//TODO:设置线程参数
-	int ret;
-	ret = pthread_create(&m_pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)m_pInternal);
-	if (ret)
+	int err;
+	err = pthread_create(&m_pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)m_pInternal);
+	if (err)
 	{
 		//线程创建失败
-		m_pInternal->isRuning =	false;
-		m_pInternal->mutex.unlock();
-		printf("create pthread error: %d \n", ret);
+		m_pInternal->state = THREAD_EXIT;
+		printf("create pthread error: %s \n", strerror(errno));
 		return false;
 	}
 
-	ret = pthread_detach(m_pInternal->handle);
-	if (ret)
+	err = pthread_detach(m_pInternal->handle);
+	if (err)
 	{
-		printf("detach pthread error: %d \n", ret);
+		printf("detach pthread error: %s \n", strerror(errno));
 	}
-
-	m_pInternal->isRuning = true;
-	m_pInternal->mutex.unlock();
 	
+	m_pInternal->state = THREAD_READY;
+
 	return true;
 }
 
-void CThread::destroy()
-{
-	m_pInternal->mutex.lock();
 
-	if (isThreadOver())
-	{
-		//线程没有运行
-		m_pInternal->mutex.unlock();
-		return ;
-	}
-
-	pthread_t curTID = pthread_self(); 
-	if (pthread_equal(curTID, m_pInternal->handle))
-	{
-		//自己关闭自己
-		m_pInternal->bLoop = false;
-		m_pInternal->mutex.unlock();
-		return ;
-	}
-
-	if (m_pInternal->isRuning)
-	{
-		m_pInternal->bLoop = false;
-		if (m_pInternal->isDestoryBlock)
-		{
-			//使用条件变量
-			pthread_join(m_pInternal->handle, NULL);
-		}
-		
-		m_pInternal->isRuning = false;
-	}
-
-	m_pInternal->mutex.unlock();
-}
-
-bool CThread::isThreadOver()
-{
-	return !m_pInternal->isRuning && !m_pInternal->bLoop;
-}
 
 
 }//Infra

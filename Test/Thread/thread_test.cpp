@@ -13,7 +13,7 @@ public:
 	}
 	void start()
 	{
-		run();
+		run(true);
 	}
 
 protected:
@@ -45,8 +45,6 @@ void thread_test(void)
 	{
 		sleep(1);
 		printf("thread_test:%d \n",i);
-
-
 	}
 	m_cond.signal();
 	while(1);

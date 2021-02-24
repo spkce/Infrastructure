@@ -54,18 +54,27 @@ class CThread
 protected:
 	CThread();
 	virtual ~CThread();
-public:
-	bool isTreadRuning() const;
-	virtual void thread_proc() = 0;
-protected:
-	bool loop() const;
-	void run();
-private:
 	bool create();
-	void destroy();
-	bool isThreadOver();
+	void run(bool isLoop = true);
+	void suspend();
+	void pasue();
+	void stop();
+	bool isTreadCreated() const;
+	bool loop() const;
+public:
+	virtual void thread_proc() = 0;
+private:
 	struct ThreadInternal* m_pInternal;
 };
+
+class CComThread
+{
+public:
+	CComThread();
+	virtual ~CComThread();
+
+};
+
 } //Infra
 
 #endif //__THREAD_H__

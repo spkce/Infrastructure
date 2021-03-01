@@ -35,7 +35,7 @@ export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC ROOT_DIR DIR_OBJ
 
 all: CHECKDIR $(OUT) End
 
-test: ECHO_TEST $(TEST)
+test: all ECHO_TEST $(TEST)
 
 CHECKDIR:
 	@sudo mkdir -p $(DIR_OBJ)

@@ -54,14 +54,39 @@ class CThread
 protected:
 	CThread();
 	virtual ~CThread();
-	bool create();
+public:
+	/**
+	* @brief 创建线程，创建后线程处于挂起状态
+	* @param isBlock 是否以阻塞的方式创建线程。
+	* @return true:成功；false:失败
+	**/
+	bool createTread(bool isBlock = false);
+
+	/**
+	* @brief 线程开始运行
+	* @param isLoop 是否只运行一次。
+	**/
 	void run(bool isLoop = true);
-	void suspend();
+
+	/**
+	* @brief 线程挂起
+	* @param isBlock 是否等待线程挂起后才返回
+	**/
+	void suspend(bool isBlock = false);
+
+	/**
+	* @brief 挂起线程继续运行
+	**/
 	void pasue();
-	void stop();
+
+	/**
+	* @brief 线程终止运行
+	* @param isBlock 是否等待线程退出后才返回
+	* @return true:成功；false:失败
+	**/
+	bool stop(bool isBlock = false);
 	bool isTreadCreated() const;
 	bool loop() const;
-public:
 	virtual void thread_proc() = 0;
 private:
 	struct ThreadInternal* m_pInternal;

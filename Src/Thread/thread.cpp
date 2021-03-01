@@ -108,8 +108,10 @@ void* ThreadInternal::proc(void* arg)
 	bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
 
-	pInternal->state = THREAD_EXCUTE;
 	printf("\033[40;35m""%s:%d %s ""\033[0m\n",__FILE__, __LINE__, __FUNCTION__);
+	pInternal->cond.signal();
+	pInternal->state = THREAD_EXCUTE;
+	printf("\033[40;35m""signal""\033[0m\n");
 	do
 	{
 		pInternal->mutex.lock();
@@ -125,6 +127,8 @@ void* ThreadInternal::proc(void* arg)
 		if (isSuspend)
 		{
 			pInternal->state = THREAD_SUSPEND;
+			printf("\033[40;35m""proc wait""\033[0m\n");
+			pInternal->cond.signal();
 			pInternal->cond.wait();
 			pInternal->state = THREAD_EXCUTE;
 			continue;
@@ -154,8 +158,6 @@ CThread::CThread()
 	m_pInternal->state = THREAD_INIT;
 	m_pInternal->owner = this;
 	m_pInternal->isDestoryBlock = true;
-
-	create();
 }
 
 CThread::~CThread()
@@ -198,10 +200,7 @@ void CThread::suspend()
 		m_pInternal->mutex.unlock();
 	}
 
-	while (m_pInternal->state != THREAD_SUSPEND)
-	{
-		sleep(1); //暂定1s
-	}
+	m_pInternal->cond.wait();
 	
 }
 
@@ -217,7 +216,7 @@ void CThread::pasue()
 	}
 }
 
-void CThread::stop()
+bool CThread::stop(bool isBlock)
 {
 	if (m_pInternal->state == THREAD_INIT || m_pInternal->state == THREAD_EXIT)
 	{
@@ -241,7 +240,7 @@ void CThread::stop()
 		m_pInternal->cond.signal();
 	}
 
-	if (m_pInternal->isDestoryBlock)
+	if (isBlock)
 	{
 		//使用条件变量，等待线程退出
 		pthread_join(m_pInternal->handle, NULL);
@@ -254,7 +253,7 @@ bool CThread::isTreadCreated() const
 }
 
 
-bool CThread::create()
+bool CThread::createTread(bool isBlock)
 {
 	if (isTreadCreated())
 	{
@@ -269,17 +268,22 @@ bool CThread::create()
 	{
 		//线程创建失败
 		m_pInternal->state = THREAD_EXIT;
-		printf("create pthread error: %s \n", strerror(errno));
+		printf("create pthread error: %d \n", err);
 		return false;
 	}
 
 	err = pthread_detach(m_pInternal->handle);
 	if (err)
 	{
-		printf("detach pthread error: %s \n", strerror(errno));
+		printf("detach pthread error: %d \n", err);
 	}
-	
+
 	m_pInternal->state = THREAD_READY;
+	if (isBlock)
+	{
+		printf("\033[40;35m""wait""\033[0m\n");
+		m_pInternal->cond.wait();
+	}
 
 	return true;
 }

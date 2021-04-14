@@ -1,5 +1,5 @@
 #include "Log.h"
-
+#include "stdio.h"
 void Log_test(void)
 {
 	print_backtrace();
@@ -16,4 +16,8 @@ void Log_test(void)
 	inst.trace("#3 CLog %s %d\n", "&", 3);
 	inst.warning("#4 CLog %s %d\n", "&", 4);
 	inst.error("#5 CLog %s %d\n", "&", 5);
+
+
+	//printf("\033[40;35m""aaaaaaaaaaaaaaaaa""\033[0m\n");
+
 }

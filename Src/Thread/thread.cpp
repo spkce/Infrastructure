@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include <string.h>
 #include <errno.h>
+#include "TFuncation.h"
 
 namespace Infra
 {
@@ -191,7 +192,7 @@ void CThread::run(bool isLoop)
 	}
 }
 
-void CThread::suspend()
+void CThread::suspend(bool isBlock)
 {
 	if (m_pInternal->state == THREAD_EXCUTE || m_pInternal->state == THREAD_WORK)
 	{
@@ -200,8 +201,10 @@ void CThread::suspend()
 		m_pInternal->mutex.unlock();
 	}
 
-	m_pInternal->cond.wait();
-	
+	if (isBlock)
+	{
+		m_pInternal->cond.wait();	
+	}	
 }
 
 void CThread::pasue()
@@ -220,7 +223,7 @@ bool CThread::stop(bool isBlock)
 {
 	if (m_pInternal->state == THREAD_INIT || m_pInternal->state == THREAD_EXIT)
 	{
-		return;
+		return false;
 	}
 
 	m_pInternal->mutex.lock();
@@ -232,7 +235,7 @@ bool CThread::stop(bool isBlock)
 	if (pthread_equal(curTID, m_pInternal->handle))
 	{
 		//此函數由线程执行体调用，不等待直接退出
-		return ;
+		return true;
 	}
 
 	if (m_pInternal->state == THREAD_SUSPEND || m_pInternal->state == THREAD_READY)
@@ -245,6 +248,8 @@ bool CThread::stop(bool isBlock)
 		//使用条件变量，等待线程退出
 		pthread_join(m_pInternal->handle, NULL);
 	}
+
+	return true;
 }
 
 bool CThread::isTreadCreated() const
@@ -289,6 +294,24 @@ bool CThread::createTread(bool isBlock)
 }
 
 
+class CComThread
+{
+public:
+	typedef TFuncation2<void, int, void*> TimerProc_t;
+public:
+	CComThread();
+	virtual ~CComThread();
+private:
+	struct ThreadInternal* m_pInternal;
+};
 
+CComThread::CComThread()
+{
 
+}
+
+CComThread::~CComThread()
+{
+
+}
 }//Infra

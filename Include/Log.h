@@ -4,6 +4,7 @@
 
 
 void print_backtrace();
+
 /*
 字背景颜色范围: 40--49                   字颜色: 30—39             
  40: 黑                           30: 黑                 
@@ -29,33 +30,41 @@ ANSI控制码:
   \033[nC   光标右移n行     
   \033[nD   光标左移n行
 */
+enum emFontColor
+{
+	Font_black = 30,
+	Font_red,
+	Font_green,
+	Font_yellow,
+	Font_blue,
+	Font_violet,
+	Font_darkGreen,
+	Font_white
+};
+
+enum emBackgroundColor
+{
+	background_black = 40,
+	background_red,
+	background_green,
+	background_yellow,
+	background_blue,
+	background_violet,
+	background_darkGreen,
+	background_white
+};
+
+// archetype:为按照那种风格进行校验，如printf/scanf等
+// string-index:格式化format字符串所在的位置,如void test(testA, format,...)，此时为2
+// first-to-check:第一个可变参数的位置，如void test(testA, format,...)，此时为3
+//__attribute__((format(archetype, string-index, first-to-check)))
+
 void exprintf(int fc, int bc, const char* fmt, ...) __attribute__((format(printf, 3, 4)));
+void exprintf(int fc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
 
 class CLog
 {
 public:
-	enum emFontColor
-	{
-		Font_black = 30,
-		Font_red,
-		Font_green,
-		Font_yellow,
-		Font_blue,
-		Font_violet,
-		Font_darkGreen,
-		Font_white
-	};
-	enum emBackgroundColor
-	{
-		background_black = 40,
-		background_red,
-		background_green,
-		background_yellow,
-		background_blue,
-		background_violet,
-		background_darkGreen,
-		background_white
-	};
 	enum emLogLevel
 	{
 		logLevel_0, //关闭所有打印

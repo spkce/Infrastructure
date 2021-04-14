@@ -49,6 +49,9 @@ private:
 
 struct ThreadInternal;
 
+/**
+* @brief 线程内，继承方式
+**/
 class CThread 
 {
 protected:
@@ -90,14 +93,6 @@ public:
 	virtual void thread_proc() = 0;
 private:
 	struct ThreadInternal* m_pInternal;
-};
-
-class CComThread
-{
-public:
-	CComThread();
-	virtual ~CComThread();
-
 };
 
 } //Infra

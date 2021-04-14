@@ -1,4 +1,6 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "link.h"
 
 namespace Infra
@@ -23,6 +25,11 @@ LinkManager::~LinkManager()
 
 }
 
+struct Node* LinkManager::getNode()
+{
+	return new struct Node();
+}
+
 CLink::CLink()
 :m_manager()
 {
@@ -31,10 +38,10 @@ CLink::CLink()
 
 CLink::~CLink()
 {
-	releas();
+	release();
 }
 
-int CLink::insert(void* payload, const unsigned int pos)
+int CLink::insert(void* payload, unsigned int pos)
 {
 	if (m_manager.iNode == 0)
 	{
@@ -48,7 +55,7 @@ int CLink::insert(void* payload, const unsigned int pos)
 		return -1;
 	}
 
-	struct Node* inp = new struct Node;
+	struct Node* inp = m_manager.getNode();
 	//装载负载
 	inp->payload = payload;
 	//左侧连接
@@ -70,7 +77,7 @@ int CLink::insert(void* payload, const unsigned int pos)
 	return m_manager.iNode++;
 }
 
-int CLink::remove(void** payload, const unsigned int pos)
+int CLink::remove(void** payload, unsigned int pos)
 {
 	if (m_manager.iNode == 0)
 	{
@@ -112,7 +119,7 @@ int CLink::remove(void** payload, const unsigned int pos)
 
 int CLink::rise(void* payload)
 {
-	struct Node* p = new struct Node;
+	struct Node* p = m_manager.getNode();
 	p->payload = payload;
 	p->prv = m_manager.end;
 	if (m_manager.end != NULL)
@@ -147,7 +154,7 @@ int CLink::reduce(void** playload)
 	return m_manager.iNode--;
 }
 
-void* CLink::get(const unsigned int pos)
+void* CLink::get(unsigned int pos)
 {
 	struct Node* p = find(pos);
 	return p == NULL ? NULL : p->payload;
@@ -160,10 +167,10 @@ unsigned int CLink::linkSize() const
 
 void CLink::clear()
 {
-	releas();
+	release();
 }
 
-Node* CLink::find(const unsigned int pos)
+Node* CLink::find(unsigned int pos)
 {
 	if (pos >= m_manager.iNode)
 	{
@@ -177,7 +184,7 @@ Node* CLink::find(const unsigned int pos)
 	return p;
 }
 
-void CLink::releas()
+void CLink::release()
 {
 	struct Node* p;
 	while (m_manager.iNode)

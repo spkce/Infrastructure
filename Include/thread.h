@@ -1,5 +1,6 @@
 #ifndef __THREAD_H__
 #define __THREAD_H__
+#include "TFuncation.h"
 
 namespace Infra
 {
@@ -47,12 +48,20 @@ private:
 	struct CondInternal* m_pInternal;
 };
 
+typedef TFuncation2<void, int, void*> TimerProc_t;
+
 struct ThreadInternal;
+
+class IThread
+{
+public:
+	TimerProc_t threadProc;
+};
 
 /**
 * @brief 线程内，继承方式
 **/
-class CThread 
+class CThread : public IThread
 {
 protected:
 	CThread();

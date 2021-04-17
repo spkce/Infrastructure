@@ -98,7 +98,8 @@ struct ThreadInternal
 	bool bSuspend;			//线程暂停函数,由用户设置true,执行体设置false
 	bool isDestoryBlock;	//标示线程退出时是否以阻塞方式退出
 	int state;				//线程状态,由proc设置
-	CThread* owner;
+	IThread* owner;
+	
 	static void* proc(void* arg);
 };
 
@@ -136,7 +137,18 @@ void* ThreadInternal::proc(void* arg)
 		}
 		
 		pInternal->state = THREAD_WORK;
-		pInternal->owner->thread_proc();
+		//threadProc
+		if (!pInternal->threadProc.isEmpty())
+		{
+			pInternal->threadProc(1, arg);
+		}
+		else
+		{
+			//没有执行函数没有注册则挂起
+			pInternal->bSuspend = true;
+			continue;
+		}
+		
 		pInternal->state = THREAD_EXCUTE;
 
 		pInternal->mutex.lock();
@@ -294,20 +306,31 @@ bool CThread::createTread(bool isBlock)
 }
 
 
-class CComThread
+class CComThread : public IThread
 {
 public:
 	typedef TFuncation2<void, int, void*> TimerProc_t;
 public:
 	CComThread();
 	virtual ~CComThread();
+
+	bool attach(TimerProc_t proc);
+public:
+	TimerProc_t thread_proc;
 private:
 	struct ThreadInternal* m_pInternal;
+	
 };
 
 CComThread::CComThread()
 {
-
+	m_pInternal = new ThreadInternal();
+	m_pInternal->bLoop = false;
+	m_pInternal->bExit = false;
+	m_pInternal->bSuspend = true;
+	m_pInternal->state = THREAD_INIT;
+	m_pInternal->owner = this;
+	m_pInternal->isDestoryBlock = true;
 }
 
 CComThread::~CComThread()

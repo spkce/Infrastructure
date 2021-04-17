@@ -93,6 +93,10 @@ public:
 			return m_func.funcPtr(PARAM_INPUT);
 		}
 	}
+	inline bool isEmpty() const
+	{
+		return (m_type == typeEmpty);
+	}
 };
 
 #undef FUCTION_TEMPLATE

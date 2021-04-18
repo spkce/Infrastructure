@@ -48,18 +48,23 @@ private:
 	struct CondInternal* m_pInternal;
 };
 
-typedef TFuncation2<void, int, void*> TimerProc_t;
 
 struct ThreadInternal;
 
+/**
+* @brief çº¿ç¨‹åŸºç±»
+**/
 class IThread
 {
+friend struct ThreadInternal;
 public:
-	TimerProc_t threadProc;
+	typedef TFuncation2<void, void *, unsigned int> TimerProc_t;
+protected:
+	TimerProc_t m_proc;
 };
 
 /**
-* @brief Ïß³ÌÄÚ£¬¼Ì³Ğ·½Ê½
+* @brief çº¿ç¨‹ç±»ï¼Œç»§æ‰¿æ–¹å¼
 **/
 class CThread : public IThread
 {
@@ -68,38 +73,38 @@ protected:
 	virtual ~CThread();
 public:
 	/**
-	* @brief ´´½¨Ïß³Ì£¬´´½¨ºóÏß³Ì´¦ÓÚ¹ÒÆğ×´Ì¬
-	* @param isBlock ÊÇ·ñÒÔ×èÈûµÄ·½Ê½´´½¨Ïß³Ì¡£
-	* @return true:³É¹¦£»false:Ê§°Ü
+	* @brief åˆ›å»ºçº¿ç¨‹ï¼Œåˆ›å»ºåçº¿ç¨‹å¤„äºæŒ‚èµ·çŠ¶æ€
+	* @param isBlock æ˜¯å¦ä»¥é˜»å¡çš„æ–¹å¼åˆ›å»ºçº¿ç¨‹ã€‚
+	* @return true:æˆåŠŸï¼›false:å¤±è´¥
 	**/
 	bool createTread(bool isBlock = false);
 
 	/**
-	* @brief Ïß³Ì¿ªÊ¼ÔËĞĞ
-	* @param isLoop ÊÇ·ñÖ»ÔËĞĞÒ»´Î¡£
+	* @brief çº¿ç¨‹å¼€å§‹è¿è¡Œ
+	* @param isLoop æ˜¯å¦åªè¿è¡Œä¸€æ¬¡ã€‚
 	**/
 	void run(bool isLoop = true);
 
 	/**
-	* @brief Ïß³Ì¹ÒÆğ
-	* @param isBlock ÊÇ·ñµÈ´ıÏß³Ì¹ÒÆğºó²Å·µ»Ø
+	* @brief çº¿ç¨‹æŒ‚èµ·
+	* @param isBlock æ˜¯å¦ç­‰å¾…çº¿ç¨‹æŒ‚èµ·åæ‰è¿”å›
 	**/
 	void suspend(bool isBlock = false);
 
 	/**
-	* @brief ¹ÒÆğÏß³Ì¼ÌĞøÔËĞĞ
+	* @brief æŒ‚èµ·çº¿ç¨‹ç»§ç»­è¿è¡Œ
 	**/
 	void pasue();
 
 	/**
-	* @brief Ïß³ÌÖÕÖ¹ÔËĞĞ
-	* @param isBlock ÊÇ·ñµÈ´ıÏß³ÌÍË³öºó²Å·µ»Ø
-	* @return true:³É¹¦£»false:Ê§°Ü
+	* @brief çº¿ç¨‹ç»ˆæ­¢è¿è¡Œ
+	* @param isBlock æ˜¯å¦ç­‰å¾…çº¿ç¨‹é€€å‡ºåæ‰è¿”å›
+	* @return true:æˆåŠŸï¼›false:å¤±è´¥
 	**/
 	bool stop(bool isBlock = false);
 	bool isTreadCreated() const;
 	bool loop() const;
-	virtual void thread_proc() = 0;
+	virtual void thread_proc(void * arg, unsigned int size) = 0;
 private:
 	struct ThreadInternal* m_pInternal;
 };

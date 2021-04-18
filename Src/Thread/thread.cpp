@@ -137,10 +137,10 @@ void* ThreadInternal::proc(void* arg)
 		}
 		
 		pInternal->state = THREAD_WORK;
-		//threadProc
-		if (!pInternal->threadProc.isEmpty())
+
+		if (pInternal->owner != NULL || !pInternal->owner->m_proc.isEmpty())
 		{
-			pInternal->threadProc(1, arg);
+			pInternal->owner->m_proc(arg, 1);
 		}
 		else
 		{
@@ -171,6 +171,8 @@ CThread::CThread()
 	m_pInternal->state = THREAD_INIT;
 	m_pInternal->owner = this;
 	m_pInternal->isDestoryBlock = true;
+
+	m_proc.bind(&CThread::thread_proc, this);
 }
 
 CThread::~CThread()
@@ -309,14 +311,11 @@ bool CThread::createTread(bool isBlock)
 class CComThread : public IThread
 {
 public:
-	typedef TFuncation2<void, int, void*> TimerProc_t;
-public:
 	CComThread();
 	virtual ~CComThread();
 
 	bool attach(TimerProc_t proc);
 public:
-	TimerProc_t thread_proc;
 private:
 	struct ThreadInternal* m_pInternal;
 	

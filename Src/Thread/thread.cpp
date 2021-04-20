@@ -220,11 +220,6 @@ CThread::~CThread()
 	m_pInternal = NULL;
 }
 
-bool CThread::loop() const
-{
-	return m_pInternal->bLoop;
-}
-
 void CThread::run(bool isLoop)
 {
 	printf("\033[40;35m""%s:%d %s ""\033[0m\n",__FILE__, __LINE__, __FUNCTION__);

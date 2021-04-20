@@ -108,13 +108,26 @@ public:
 	* @return true:成功；false:失败
 	**/
 	bool stop(bool isBlock = false);
-	
+
+	/**
+	* @brief 注册线程执行函数
+	* @param proc 执行函数
+	* @return true:成功；false:失败
+	**/
 	bool attachProc(ThreadProc_t & proc);
 
+	/**
+	* @brief 注册线程执行函数
+	* @param proc 已经注册过的执行函数
+	* @return true:成功；false:失败
+	**/
 	bool detachProc(ThreadProc_t & proc);
 
+	/**
+	* @brief 线程是否已经成功创建（createTread）
+	* @return true:已创建；false:未创建
+	**/
 	bool isTreadCreated() const;
-	bool loop() const;
 };
 
 } //Infra

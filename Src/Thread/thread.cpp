@@ -140,7 +140,7 @@ void* ThreadInternal::proc(void* arg)
 
 		if (pInternal->owner != NULL || !pInternal->owner->m_proc.isEmpty())
 		{
-			pInternal->owner->m_proc(arg, 1);
+			pInternal->owner->m_proc(arg);
 		}
 		else
 		{
@@ -161,10 +161,48 @@ void* ThreadInternal::proc(void* arg)
 	return NULL;
 }
 
+IThread::IThread()
+{
+
+}
+
+IThread::~IThread()
+{
+
+}
+
+int IThread::create(struct ThreadInternal* pInternal)
+{
+	//TODO:设置线程参数
+	int err = pthread_create(&pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)pInternal);
+	if (err)
+	{
+		//线程创建失败
+		printf("create pthread error: %d \n", err);
+		return err;
+	}
+
+	//设置线程为可分离状态，线程运行结束后会自动释放资源。
+	if (pthread_detach(pInternal->handle))
+	{
+		printf("detach pthread error: %d \n", err);
+	}
+	return err;
+}
+
+struct ThreadInternal* IThread::allocateThread()
+{
+	return  new ThreadInternal();
+}
+
+void IThread::releaseThread(struct ThreadInternal* pInternal)
+{
+	delete pInternal;
+}
 
 CThread::CThread()
 {
-	m_pInternal = new ThreadInternal();
+	m_pInternal = allocateThread();
 	m_pInternal->bLoop = false;
 	m_pInternal->bExit = false;
 	m_pInternal->bSuspend = true;
@@ -172,14 +210,13 @@ CThread::CThread()
 	m_pInternal->owner = this;
 	m_pInternal->isDestoryBlock = true;
 
-	m_proc.bind(&CThread::thread_proc, this);
 }
 
 CThread::~CThread()
 {
 	stop();
 	
-	delete m_pInternal;
+	releaseThread(m_pInternal);
 	m_pInternal = NULL;
 }
 
@@ -266,6 +303,42 @@ bool CThread::stop(bool isBlock)
 	return true;
 }
 
+bool CThread::attachProc(ThreadProc_t & proc)
+{
+	if (m_pInternal->state == THREAD_EXCUTE 
+		|| m_pInternal->state == THREAD_WORK
+		|| m_pInternal->state == THREAD_EXIT)
+	{
+		return false;
+	}
+
+	if (m_proc.isEmpty())
+	{
+		m_proc = proc;
+		return true;
+	}
+
+	return false;
+}
+	
+bool CThread::detachProc(ThreadProc_t & proc)
+{
+	if (m_pInternal->state == THREAD_EXCUTE 
+		|| m_pInternal->state == THREAD_WORK
+		|| m_pInternal->state == THREAD_EXIT)
+	{
+		return false;
+	}
+
+	if (!m_proc.isEmpty() && m_proc == proc)
+	{
+		m_proc.unbind();
+		return true;
+	}
+	
+	return false;
+}
+
 bool CThread::isTreadCreated() const
 {
 	return m_pInternal->state >= THREAD_READY;
@@ -280,21 +353,12 @@ bool CThread::createTread(bool isBlock)
 		return false;
 	}
 	
-	//TODO:设置线程参数
-	int err;
-	err = pthread_create(&m_pInternal->handle, NULL, (void*(*)(void*))&ThreadInternal::proc, (void*)m_pInternal);
-	if (err)
+	if (create(m_pInternal))
 	{
 		//线程创建失败
 		m_pInternal->state = THREAD_EXIT;
-		printf("create pthread error: %d \n", err);
+		printf("create pthread error\n");
 		return false;
-	}
-
-	err = pthread_detach(m_pInternal->handle);
-	if (err)
-	{
-		printf("detach pthread error: %d \n", err);
 	}
 
 	m_pInternal->state = THREAD_READY;
@@ -308,32 +372,4 @@ bool CThread::createTread(bool isBlock)
 }
 
 
-class CComThread : public IThread
-{
-public:
-	CComThread();
-	virtual ~CComThread();
-
-	bool attach(TimerProc_t proc);
-public:
-private:
-	struct ThreadInternal* m_pInternal;
-	
-};
-
-CComThread::CComThread()
-{
-	m_pInternal = new ThreadInternal();
-	m_pInternal->bLoop = false;
-	m_pInternal->bExit = false;
-	m_pInternal->bSuspend = true;
-	m_pInternal->state = THREAD_INIT;
-	m_pInternal->owner = this;
-	m_pInternal->isDestoryBlock = true;
-}
-
-CComThread::~CComThread()
-{
-
-}
 }//Infra

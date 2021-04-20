@@ -4,21 +4,17 @@
 
 Infra::CCondSignal m_cond;
 
-class CThreadTest : public Infra::CThread
+class CThreadTest
 {
 public:
-	CThreadTest():CThread()
+	CThreadTest()
 	{
+		Infra::IThread::ThreadProc_t callback1(&CThreadTest::thread_proc, this);
 
+		m_thread.attachProc(callback1);
+		m_thread.run(true);
 	}
-	void start()
-	{
-		run(true);
-	}
-
-protected:
-	
-	void thread_proc()
+	void thread_proc(void* a)
 	{
 		static int i = 0;
 		if ( i == 5)
@@ -29,25 +25,25 @@ protected:
 		sleep(1);
 		
 	}
-
+	Infra::CThread m_thread;
 };
 
 void thread_test(void)
 {
 	int i = 10;
-	CThreadTest a;
-	a.createTread(false);
-	a.start();
+	
+	CThreadTest b;
+
 	while(i--)
 	{
 		sleep(1);
 		if (i == 5)
 		{
-			a.suspend();
+			b.m_thread.suspend();
 		}
 		if (i == 1)
 		{
-			a.pasue();
+			b.m_thread.pasue();
 		}
 		printf("thread_test:%d \n",i);
 	}

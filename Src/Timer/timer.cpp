@@ -75,7 +75,7 @@ public:
 	void setupTimer(TimerInternal* p);
 private:
 	void allocateIdleTimer(unsigned int n);
-	void thread_proc();
+	void thread_proc(void* arg);
 	static long getCurTime();
 
 private:
@@ -199,7 +199,7 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 	}
 }
 
-void CTimerManger::thread_proc()
+void CTimerManger::thread_proc(void* arg)
 {
 	TimerInternal* p = NULL;
 

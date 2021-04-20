@@ -76,12 +76,42 @@ public:
 		}
 	}
 
+	void unbind()
+	{
+		if (m_type == typeMember)
+		{
+			m_func.memFunc.proc = NULL;
+			m_func.memFunc.obj = NULL;
+		}
+		else if (m_type == typePointer)
+		{
+			m_func.funcPtr = NULL;
+		}
+
+		m_type = typeEmpty;
+	}
+
 	inline FUCTION_TEMPLATE & operator=(FUCTION_TEMPLATE & fun)
 	{
 		this->m_type = fun.m_type;
 		this->m_func = fun.m_func;
 		return *this;
 	}
+
+	bool operator==(FUCTION_TEMPLATE & fun)
+	{
+		if (m_type == typeMember && fun.m_type == typeMember)
+		{
+			return m_func.memFunc.proc == fun.m_func.memFunc.proc && m_func.memFunc.obj == fun.m_func.memFunc.obj;
+		}
+		else if (m_type == typePointer && fun.m_type == typePointer)
+		{
+			return m_func.funcPtr == fun.m_func.funcPtr;
+		}
+		
+		return false;
+	}
+
 	inline R operator()(PARAM_LIST)
 	{
 		if (m_type == typeMember)

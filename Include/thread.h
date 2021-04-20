@@ -58,20 +58,26 @@ class IThread
 {
 friend struct ThreadInternal;
 public:
-	typedef TFuncation2<void, void *, unsigned int> TimerProc_t;
+	typedef TFuncation1<void, void *> ThreadProc_t;
 protected:
-	TimerProc_t m_proc;
+	IThread();
+	virtual ~IThread();
+	int create(struct ThreadInternal* pInternal);
+	struct ThreadInternal* allocateThread();
+	void releaseThread(struct ThreadInternal* pInternal);
+	
+	ThreadProc_t m_proc;
+	struct ThreadInternal* m_pInternal;
 };
 
 /**
-* @brief 线程类，继承方式
+* @brief 线程类
 **/
 class CThread : public IThread
 {
-protected:
+public:
 	CThread();
 	virtual ~CThread();
-public:
 	/**
 	* @brief 创建线程，创建后线程处于挂起状态
 	* @param isBlock 是否以阻塞的方式创建线程。
@@ -102,11 +108,13 @@ public:
 	* @return true:成功；false:失败
 	**/
 	bool stop(bool isBlock = false);
+	
+	bool attachProc(ThreadProc_t & proc);
+
+	bool detachProc(ThreadProc_t & proc);
+
 	bool isTreadCreated() const;
 	bool loop() const;
-	virtual void thread_proc(void * arg, unsigned int size) = 0;
-private:
-	struct ThreadInternal* m_pInternal;
 };
 
 } //Infra

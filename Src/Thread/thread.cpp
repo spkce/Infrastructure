@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include "TFuncation.h"
+#include "link.h"
 
 namespace Infra
 {
@@ -366,5 +367,52 @@ bool CThread::createTread(bool isBlock)
 	return true;
 }
 
+class CThreadPoolManager
+{
+public:
+	static CThreadPoolManager* instance();
+private:
+	CThreadPoolManager();
+	~CThreadPoolManager();
+	IThread* allocThread();
+	bool releaseThread(IThread*pthread);
 
+public:
+	IThread* applyThread();
+
+	bool cancelThread(IThread* pthread);
+	
+private:
+	IThread* allocThread();
+
+	IThread* releaseThread();
+
+	CLink m_linkWork;
+	CLink m_linkIdle;
+};
+
+CThreadPoolManager* CThreadPoolManager::instance()
+{
+	static CThreadPoolManager* pInstance = NULL;
+	if (pInstance == NULL)
+	{
+		static Infra::CMutex sm_mutex;
+		Infra::CGuard<Infra::CMutex> guard(sm_mutex);
+		if (pInstance == NULL)
+		{
+			pInstance = new CThreadPoolManager;
+		}
+	}
+	return pInstance;
+}
+
+CThreadPoolManager::CThreadPoolManager()
+{
+
+}
+
+CThreadPoolManager::~CThreadPoolManager()
+{
+
+}
 }//Infra

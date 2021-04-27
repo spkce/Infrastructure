@@ -50,15 +50,13 @@ private:
 
 
 struct ThreadInternal;
-
+typedef TFuncation1<void, void *> ThreadProc_t;
 /**
 * @brief 线程基类
 **/
 class IThread
 {
 friend struct ThreadInternal;
-public:
-	typedef TFuncation1<void, void *> ThreadProc_t;
 protected:
 	IThread();
 	virtual ~IThread();
@@ -87,7 +85,7 @@ public:
 
 	/**
 	* @brief 线程开始运行
-	* @param isLoop 是否只运行一次。
+	* @param isLoop 是否只循环运行。
 	**/
 	void run(bool isLoop = true);
 
@@ -114,14 +112,14 @@ public:
 	* @param proc 执行函数
 	* @return true:成功；false:失败
 	**/
-	bool attachProc(ThreadProc_t & proc);
+	bool attachProc(const ThreadProc_t & proc);
 
 	/**
 	* @brief 注册线程执行函数
 	* @param proc 已经注册过的执行函数
 	* @return true:成功；false:失败
 	**/
-	bool detachProc(ThreadProc_t & proc);
+	bool detachProc(const ThreadProc_t & proc);
 
 	/**
 	* @brief 线程是否已经成功创建（createTread）

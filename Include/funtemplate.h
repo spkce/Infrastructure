@@ -91,14 +91,14 @@ public:
 		m_type = typeEmpty;
 	}
 
-	inline FUCTION_TEMPLATE & operator=(FUCTION_TEMPLATE & fun)
+	inline FUCTION_TEMPLATE & operator=(const FUCTION_TEMPLATE & fun)
 	{
 		this->m_type = fun.m_type;
 		this->m_func = fun.m_func;
 		return *this;
 	}
 
-	bool operator==(FUCTION_TEMPLATE & fun)
+	bool operator==(const FUCTION_TEMPLATE & fun)
 	{
 		if (m_type == typeMember && fun.m_type == typeMember)
 		{

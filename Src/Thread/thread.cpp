@@ -299,7 +299,7 @@ bool CThread::stop(bool isBlock)
 	return true;
 }
 
-bool CThread::attachProc(ThreadProc_t & proc)
+bool CThread::attachProc(const ThreadProc_t & proc)
 {
 	if (m_pInternal->state == THREAD_EXCUTE 
 		|| m_pInternal->state == THREAD_WORK
@@ -317,7 +317,7 @@ bool CThread::attachProc(ThreadProc_t & proc)
 	return false;
 }
 	
-bool CThread::detachProc(ThreadProc_t & proc)
+bool CThread::detachProc(const ThreadProc_t & proc)
 {
 	if (m_pInternal->state == THREAD_EXCUTE 
 		|| m_pInternal->state == THREAD_WORK
@@ -367,52 +367,4 @@ bool CThread::createTread(bool isBlock)
 	return true;
 }
 
-class CThreadPoolManager
-{
-public:
-	static CThreadPoolManager* instance();
-private:
-	CThreadPoolManager();
-	~CThreadPoolManager();
-	IThread* allocThread();
-	bool releaseThread(IThread*pthread);
-
-public:
-	IThread* applyThread();
-
-	bool cancelThread(IThread* pthread);
-	
-private:
-	IThread* allocThread();
-
-	IThread* releaseThread();
-
-	CLink m_linkWork;
-	CLink m_linkIdle;
-};
-
-CThreadPoolManager* CThreadPoolManager::instance()
-{
-	static CThreadPoolManager* pInstance = NULL;
-	if (pInstance == NULL)
-	{
-		static Infra::CMutex sm_mutex;
-		Infra::CGuard<Infra::CMutex> guard(sm_mutex);
-		if (pInstance == NULL)
-		{
-			pInstance = new CThreadPoolManager;
-		}
-	}
-	return pInstance;
-}
-
-CThreadPoolManager::CThreadPoolManager()
-{
-
-}
-
-CThreadPoolManager::~CThreadPoolManager()
-{
-
-}
 }//Infra

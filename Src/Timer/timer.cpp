@@ -204,7 +204,8 @@ void CTimerManger::thread_proc(void* arg)
 	TimerInternal* p = NULL;
 
 	long timeout = 0;
-	while(loop())
+	//while(loop())
+	do
 	{
 		
 		m_mutexWorkLink.lock();
@@ -234,7 +235,7 @@ void CTimerManger::thread_proc(void* arg)
 		}
 
 		usleep(1000);
-	}
+	} while(0);
 }
 
 long CTimerManger::getCurTime()

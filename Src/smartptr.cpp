@@ -56,7 +56,26 @@ public:
 private:
 	U_Ptr<T> *rp; //辅助类对象指针
 };
+int main()
+{
+	int *i = new int(2);
+	{
+		SmartPtr<int> ptr1(i);
+		{
+			SmartPtr<int> ptr2(ptr1);
+			{
+				SmartPtr<int> ptr3 = ptr2;
 
+				cout << *ptr1 << endl;
+				*ptr1 = 20;
+				cout << *ptr2 << endl;
+
+			}
+		}
+	}
+	system("pause");
+	return 0;
+}
 #ifdef WIN32
 	this->refercounter = 0;
 #else

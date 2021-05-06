@@ -254,7 +254,7 @@ CTimer::~CTimer()
 {
 }
 
-bool CTimer::setTimerAttr(TimerProc_t & proc, unsigned int period, unsigned int delay, int times)
+bool CTimer::setTimerAttr(const TimerProc_t & proc, unsigned int period, unsigned int delay, int times)
 {
 	if (m_pInternal == NULL)
 	{
@@ -268,7 +268,7 @@ bool CTimer::setTimerAttr(TimerProc_t & proc, unsigned int period, unsigned int 
 	return true;
 }
 
-bool CTimer::setProc(TimerProc_t & proc)
+bool CTimer::setProc(const TimerProc_t & proc)
 {
 	if (m_pInternal == NULL)
 	{

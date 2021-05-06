@@ -32,8 +32,8 @@ CThreadPoolManager* CThreadPoolManager::instance()
 CThreadPoolManager::CThreadPoolManager()
 {
 	m_pInternal = new ThreadPoolInternal();
-	m_workThread.attachProc(ThreadProc_t(&CThreadPoolManager::workProc, this));
-	m_workThread.run(true);
+	m_pInternal->m_workThread.attachProc(ThreadProc_t(&CThreadPoolManager::workProc, this));
+	m_pInternal->m_workThread.run(true);
 }
 
 CThreadPoolManager::~CThreadPoolManager()

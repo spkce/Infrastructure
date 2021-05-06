@@ -56,26 +56,7 @@ public:
 private:
 	U_Ptr<T> *rp; //辅助类对象指针
 };
-int main()
-{
-	int *i = new int(2);
-	{
-		autoPointer<int> ptr1(i);
-		{
-			autoPointer<int> ptr2(ptr1);
-			{
-				autoPointer<int> ptr3 = ptr2;
 
-				cout << *ptr1 << endl;
-				*ptr1 = 20;
-				cout << *ptr2 << endl;
-
-			}
-		}
-	}
-	system("pause");
-	return 0;
-}
 //#ifdef WIN32
 //	this->refercounter = 0;
 //#else

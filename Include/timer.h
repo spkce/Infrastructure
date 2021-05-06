@@ -16,8 +16,8 @@ public:
 	CTimer(const char* name);
 	virtual ~CTimer();
 	
-	bool setTimerAttr(TimerProc_t & proc, unsigned int period, unsigned int delay = 0, int times = -1);
-	bool setProc(TimerProc_t & proc);
+	bool setTimerAttr(const TimerProc_t & proc, unsigned int period, unsigned int delay = 0, int times = -1);
+	bool setProc(const TimerProc_t & proc);
 	bool run();
 	
 private:

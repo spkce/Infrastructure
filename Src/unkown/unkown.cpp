@@ -33,7 +33,7 @@ public:
 
 	T* getInterface(int iid);
 
-	T* createInstance()
+	T* createInstance();
 public:
 	std::map<int, T*> m_map;
 };
@@ -45,8 +45,8 @@ public:
 	~Instance() {};
 
 	/*ddd*/
-}
-
+};
+/*
 class CInstanceA : public Instance
 {
 
@@ -63,7 +63,7 @@ public:
 		static Instance* getInstance(int clsid)
 		{
 			
-			return 
+			return  
 		}
 	};
 
@@ -80,3 +80,4 @@ int main()
 //#else
 //	atomic_set(&this->refercouter, 0);
 //#endif
+*/

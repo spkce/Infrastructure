@@ -25,9 +25,9 @@ private:
 	void workProc(void *arg);
 
 private:
-	IThread *allocThread();
+	void allocThread();
 
-	IThread *releaseThread();
+	void releaseThread(IThread* pThread);
 
 	struct ThreadPoolInternal* m_pInternal;
 };

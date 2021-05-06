@@ -38,27 +38,33 @@ CThreadPoolManager::CThreadPoolManager()
 
 CThreadPoolManager::~CThreadPoolManager()
 {
-
+	m_pInternal->m_workThread.stop(true);
+	m_pInternal->m_workThread.detachProc(ThreadProc_t(&CThreadPoolManager::workProc, this));
+	delete m_pInternal;
 }
 
 IThread* CThreadPoolManager::applyThread()
 {
-
+	IThread* p = NULL;
+	m_pInternal->listIdle.reduce((void**)&p);
+	m_pInternal->listWork.rise((void*)p);
+	return p;
 }
 
 bool CThreadPoolManager::cancelThread(IThread* pthread)
 {
-
+	//m_pInternal->listWork.find()
 }
 
-IThread* CThreadPoolManager::allocThread()
+void CThreadPoolManager::allocThread()
 {
-
+	IThread* p = new CThread();
+	m_pInternal->listIdle.rise((void*)p);
 }
 
-IThread* CThreadPoolManager::releaseThread()
+void CThreadPoolManager::releaseThread(IThread* pThread)
 {
-
+	delete pThread;
 }
 
 void CThreadPoolManager::workProc(void* arg)

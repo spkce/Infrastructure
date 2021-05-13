@@ -14,7 +14,7 @@ public:
 private:
 	CThreadPoolManager();
 	~CThreadPoolManager();
-	bool releaseThread(IThread *pthread);
+	//bool releaseThread(IThread *pthread);
 
 public:
 	IThread *applyThread();

@@ -1,12 +1,14 @@
 
 
 SOURCES = $(wildcard *${FILE_TYPE})
-object = $(patsubst %${FILE_TYPE}, %, ${SOURCES})
+object = $(patsubst %${FILE_TYPE}, %.o, ${SOURCES})
 
 all: ECHO $(object)
 
-% : %${FILE_TYPE}
-	@$(CC) -c $(CFLAGS) -lpthread $^ -o $(ROOT_DIR)/$(DIR_OBJ)/$@ $(INC)
+$(object) : %.o : %${FILE_TYPE}
+	@echo "CC $(notdir $@)"
+	@$(CC)  $(CFLAGS) $(INC) -lpthread -c $< -o $(ROOT_DIR)/$(DIR_OBJ)/$@ 
 
 ECHO:
 	@echo "Thread compile ..."
+	@echo  $(object)

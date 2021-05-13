@@ -57,6 +57,7 @@ typedef TFuncation1<void, void *> ThreadProc_t;
 class IThread
 {
 friend struct ThreadInternal;
+friend struct CThreadPoolManager;
 protected:
 	IThread();
 	virtual ~IThread();

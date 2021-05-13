@@ -9,9 +9,8 @@ class CThreadTest
 public:
 	CThreadTest()
 	{
-		Infra::IThread::ThreadProc_t callback1(&CThreadTest::thread_proc, this);
-
-		m_thread.attachProc(callback1);
+		m_thread.attachProc(Infra::ThreadProc_t(&CThreadTest::thread_proc, this));
+		m_thread.createTread();
 		m_thread.run(true);
 	}
 	void thread_proc(void* a)

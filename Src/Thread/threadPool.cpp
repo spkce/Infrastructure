@@ -53,7 +53,28 @@ IThread* CThreadPoolManager::applyThread()
 
 bool CThreadPoolManager::cancelThread(IThread* pthread)
 {
-	//m_pInternal->listWork.find()
+	CLink& worklist = m_pInternal->listWork;
+	void * p = NULL;
+
+	//worklist.find((void*)pthread);
+	const size_t num = worklist.linkSize();
+	for (size_t i = 0; i < num; i++)
+	{
+		if (pthread == worklist.get(i))
+		{
+			worklist.remove(&p, i);
+			break;
+		}
+	}
+
+	if (p == NULL)
+	{
+		return false;
+	}
+
+	m_pInternal->listIdle.rise((void *)pthread);
+
+	return false;
 }
 
 void CThreadPoolManager::allocThread()
@@ -71,4 +92,5 @@ void CThreadPoolManager::workProc(void* arg)
 {
 
 }
+
 }//Infra

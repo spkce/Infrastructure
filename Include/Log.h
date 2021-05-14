@@ -129,4 +129,6 @@ public:
 #define Warning(fmt, ...) CGlobalLog::instance()->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 #define Error(fmt, ...) CGlobalLog::instance()->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 
+
+
 #endif //__LOG_H__

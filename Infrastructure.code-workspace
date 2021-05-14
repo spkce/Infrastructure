@@ -8,7 +8,32 @@
 		"files.associations": {
 			"iosfwd": "cpp",
 			"memory": "cpp",
-			"xmemory": "cpp"
+			"xmemory": "cpp",
+			"initializer_list": "cpp",
+			"xtree": "cpp",
+			"xutility": "cpp",
+			"map": "cpp",
+			"algorithm": "cpp",
+			"atomic": "cpp",
+			"cctype": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"cstddef": "cpp",
+			"cstdint": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"cwchar": "cpp",
+			"exception": "cpp",
+			"limits": "cpp",
+			"new": "cpp",
+			"string": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"typeinfo": "cpp",
+			"utility": "cpp",
+			"xstddef": "cpp",
+			"xtr1common": "cpp"
 		}
 	}
 }

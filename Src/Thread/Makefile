@@ -11,4 +11,3 @@ $(object) : %.o : %${FILE_TYPE}
 
 ECHO:
 	@echo "Thread compile ..."
-	@echo  $(object)

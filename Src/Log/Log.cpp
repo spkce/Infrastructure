@@ -1,8 +1,10 @@
 #include "stdio.h"
 #include <string.h>
+#include <map>
 #include "execinfo.h"
 #include "Log.h"
 #include <stdarg.h>
+#include "thread.h"
 
 void print_backtrace()
 {
@@ -150,4 +152,52 @@ CGlobalLog::CGlobalLog()
 CGlobalLog::~CGlobalLog()
 {
 
+}
+
+class CLogManager
+{
+private:
+	CLogManager();
+	~CLogManager()
+public:
+	static CLogManager* instance();
+	
+	CLog* getLog(std::string name);
+private:
+	static Infra::CMutex m_mutex;
+	std::map<std::string, CLog*> m_mapLog;
+};
+
+CLogManager::CLogManager()
+{
+
+}
+CLogManager::~CLogManager()
+{
+	std::map<std::string, CLog *>::iterator iter;
+	for (iter = m_mapLog.begin(); iter != m_mapLog.end();)
+	{
+		delete iter->second;
+		m_mapLog.erase(iter++);
+	}
+}
+
+static CLogManager* CLogManager::instance()
+{
+	static CLogManager inst;
+	return &inst;
+}
+
+bool CLogManager::getLog(std::string name)
+{
+	Infra::CGuard<Infra::CMutex> guard(m_mutex);
+	std::map<std::string, CLog*>::iterator iter = m_mapLog.find(name);
+	if (iter == m_mapLog.end())
+	{
+		CLog* p = new CTcpServer(port);
+		m_mapLog.insert(std::pair<std::string, CLog*>(name, p));
+		return p;
+	}
+
+	return iter->second;
 }

@@ -86,7 +86,7 @@ public:
 
 	/**
 	* @brief 线程开始运行
-	* @param isLoop 是否只循环运行。
+	* @param isLoop 是否循环运行。
 	**/
 	void run(bool isLoop = true);
 

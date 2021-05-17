@@ -89,7 +89,7 @@ public:
 private:
 	Node* find(unsigned int pos);
 	void release();
-	void* removeNode(struct Node* p, struct LinkManager * pManager) const;
+	Node* removeNode(struct Node* p, struct LinkManager * pManager) const;
 	struct LinkManager m_manager;
 };
 

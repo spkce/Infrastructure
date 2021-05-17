@@ -252,7 +252,7 @@ int CLink::find(void* payload)
 	return -1;
 }
 
-void* CLink::removeNode(struct Node* p, struct LinkManager * pManager) const
+Node* CLink::removeNode(struct Node* p, struct LinkManager * pManager) const
 {
 	//左侧断开
 	if (p->prv != NULL)

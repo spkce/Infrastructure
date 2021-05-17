@@ -158,7 +158,7 @@ class CLogManager
 {
 private:
 	CLogManager();
-	~CLogManager()
+	~CLogManager();
 public:
 	static CLogManager* instance();
 	
@@ -182,19 +182,19 @@ CLogManager::~CLogManager()
 	}
 }
 
-static CLogManager* CLogManager::instance()
+CLogManager* CLogManager::instance()
 {
 	static CLogManager inst;
 	return &inst;
 }
 
-bool CLogManager::getLog(std::string name)
+CLog* CLogManager::getLog(std::string name)
 {
 	Infra::CGuard<Infra::CMutex> guard(m_mutex);
 	std::map<std::string, CLog*>::iterator iter = m_mapLog.find(name);
 	if (iter == m_mapLog.end())
 	{
-		CLog* p = new CTcpServer(port);
+		CLog* p = new CLog(CLog::type_fileMsg, name, std::string(""));
 		m_mapLog.insert(std::pair<std::string, CLog*>(name, p));
 		return p;
 	}

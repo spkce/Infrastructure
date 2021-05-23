@@ -3,7 +3,7 @@
 CC = g++
 AR = ar
 FILE_TYPE = .cpp
-CFLAGS = -Wall
+CFLAGS = -Wall -DINFRA_LOG
 MAKE_CFLAGS = --no-print-directory
 
 ROOT_DIR = $(shell pwd)

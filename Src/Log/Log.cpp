@@ -164,7 +164,7 @@ public:
 	
 	CLog* getLog(std::string name);
 private:
-	static Infra::CMutex m_mutex;
+	Infra::CMutex m_mutex;
 	std::map<std::string, CLog*> m_mapLog;
 };
 

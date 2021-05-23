@@ -4,9 +4,13 @@
 namespace Infra
 {
 
-void infraPrint(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 4, 5)));
+void InteralPrint(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 4, 5)));
 
-#define printex(fmt, ...) infraPrint(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#ifdef INFRA_LOG
+#define trace(fmt, ...) InteralPrint(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#else
+#define trace(fmt, ...)
+#endif
 
 } //Infra
 

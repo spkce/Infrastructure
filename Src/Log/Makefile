@@ -6,7 +6,7 @@ all: ECHO $(object)
 
 $(object) : %.o : %${FILE_TYPE}
 	@echo "CC $(notdir $@)"
-	@$(CC)  $(CFLAGS) $(INC) -lpthread -c $< -o $(ROOT_DIR)/$(DIR_OBJ)/$@
+	@$(CC)  $(CFLAGS) $(INC) $(INC_INTERNAL) -lpthread -c $< -o $(ROOT_DIR)/$(DIR_OBJ)/$@
 
 ECHO:
 	@echo "log compile ..."

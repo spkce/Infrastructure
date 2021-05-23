@@ -20,7 +20,7 @@ public:
 		{
 			//m_cond.wait();
 		}
-		printf("CThreadTest::thread_proc: %d\n", i++);
+		printf("%s: %d\n", __FUNCTION__,i++);
 		sleep(1);
 		
 	}

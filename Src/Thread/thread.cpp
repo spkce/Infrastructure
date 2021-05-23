@@ -6,6 +6,7 @@
 #include <errno.h>
 #include "TFuncation.h"
 #include "link.h"
+#include "logInternal.h"
 
 namespace Infra
 {
@@ -111,10 +112,10 @@ void* ThreadInternal::proc(void* arg)
 	bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
 
-	printf("\033[40;35m""%s:%d %s ""\033[0m\n",__FILE__, __LINE__, __FUNCTION__);
+	trace("thread proc run\n");
 	pInternal->cond.signal();
 	pInternal->state = THREAD_EXCUTE;
-	printf("\033[40;35m""signal""\033[0m\n");
+	trace("thread proc signal\n");
 	do
 	{
 		pInternal->mutex.lock();
@@ -130,7 +131,7 @@ void* ThreadInternal::proc(void* arg)
 		if (isSuspend)
 		{
 			pInternal->state = THREAD_SUSPEND;
-			printf("\033[40;35m""proc wait""\033[0m\n");
+			trace("thread proc wait\n");
 			pInternal->cond.signal();
 			pInternal->cond.wait();
 			pInternal->state = THREAD_EXCUTE;
@@ -179,14 +180,14 @@ int IThread::create(struct ThreadInternal* pInternal)
 	if (err)
 	{
 		//线程创建失败
-		printf("create pthread error: %d \n", err);
+		trace("create pthread error: %d\n",err);
 		return err;
 	}
 
 	//设置线程为可分离状态，线程运行结束后会自动释放资源。
 	if (pthread_detach(pInternal->handle))
 	{
-		printf("detach pthread error: %d \n", err);
+		trace("detach pthread error: %d\n",err);
 	}
 	return err;
 }
@@ -223,7 +224,7 @@ CThread::~CThread()
 
 void CThread::run(bool isLoop)
 {
-	printf("\033[40;35m""%s:%d %s ""\033[0m\n",__FILE__, __LINE__, __FUNCTION__);
+	trace("isLoop: %d\n", isLoop);
 	if (m_pInternal->state == THREAD_EXIT)
 	{
 		return ;
@@ -343,6 +344,7 @@ bool CThread::isTreadCreated() const
 
 bool CThread::createTread(bool isBlock)
 {
+	trace("isBlock: %d\n", isBlock);
 	if (isTreadCreated())
 	{
 		//线程已经运行
@@ -353,14 +355,14 @@ bool CThread::createTread(bool isBlock)
 	{
 		//线程创建失败
 		m_pInternal->state = THREAD_EXIT;
-		printf("create pthread error\n");
+		trace("create pthread error\n");
 		return false;
 	}
 
 	m_pInternal->state = THREAD_READY;
 	if (isBlock)
 	{
-		printf("\033[40;35m""wait""\033[0m\n");
+		trace("create pthread error\n");
 		m_pInternal->cond.wait();
 	}
 

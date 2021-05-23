@@ -10,7 +10,7 @@
 namespace Infra
 {
 
-void infraPrint(const char* file, int line, const char* func, const char* fmt, ...)
+void InteralPrint(const char* file, int line, const char* func, const char* fmt, ...)
 {
 	char buffer[8192];
 	buffer[8191] = 0;
@@ -24,24 +24,14 @@ void infraPrint(const char* file, int line, const char* func, const char* fmt, .
 	va_end(args);
 }
 
-void exprintf(int fc, int bc, const char* fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	fprintf(stdout,"\033[%d;%dm", fc, bc);
-	vfprintf(stdout, fmt, args);
-	fprintf(stdout,"\033[0m");
-	va_end(args);
-}
-
-void exprintf(int fc, const char* fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	fprintf(stdout,"\033[%dm", fc);
-	vfprintf(stdout, fmt, args);
-	fprintf(stdout,"\033[0m");
-	va_end(args);
-}
+//static std::string _CutParenthesesNTail(std::string&& prettyFuncon)
+//{
+//    auto pos = prettyFuncon.find('(');
+//    if(pos!=std::string::npos)
+//        prettyFuncon.erase(prettyFuncon.begin()+pos, prettyFuncon.end());
+//
+//    return std::move(prettyFuncon);
+//}
+//#define __STR_FUNCTION__ _CutParenthesesNTail(std::string(__PRETTY_FUNCTION__))
 
 } //Infra

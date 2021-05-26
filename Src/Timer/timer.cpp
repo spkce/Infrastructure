@@ -136,28 +136,28 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	TimerInternal* pTemp = NULL;
 	unsigned int i = 0;
 	unsigned int iTemp = (p->delay !=0) ? p->delay : p->period;
-	trace("setupTimer name: %s \n", p->name);
+	InfraTrace("setupTimer name: %s \n", p->name);
 	Infra::CGuard<Infra::CMutex> guard(m_mutexWorkLink);
 
 	const unsigned int iEmployLink = m_linkWorkTimer.linkSize();
 
 	m_curTime = getCurTime();
 	
-	trace("m_curTime = %d ms \n", m_curTime);
+	InfraTrace("m_curTime = %d ms \n", m_curTime);
 	
 	if (iEmployLink == 0)
 	{
 		p->isIdle = false;
 		p->setupTime = m_curTime;
 		m_linkWorkTimer.insert((void*)p, i);
-		trace("i = #1 %d  \n", i);
+		InfraTrace("i = #1 %d  \n", i);
 		m_iWorkTimer++;
 		return;
 	}
-	trace("iEmployLink = %d \n", iEmployLink);
+	InfraTrace("iEmployLink = %d \n", iEmployLink);
 	for (i = 0; i < iEmployLink; i++)
 	{
-		trace("i = %d \n", i);
+		InfraTrace("i = %d \n", i);
 		pTemp = (TimerInternal*)m_linkWorkTimer.get(i);
 		//此定时器是第一个装载
 		if (pTemp == NULL)
@@ -169,15 +169,15 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			m_iWorkTimer++;
 			return;
 		}
-		trace("pTemp->getTimeout() = %d \n", pTemp->getTimeout());
-		trace("iTemp = %d \n", iTemp);
+		InfraTrace("pTemp->getTimeout() = %d \n", pTemp->getTimeout());
+		InfraTrace("iTemp = %d \n", iTemp);
 		//按timeout时间查找位置
 		if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
 		{
 			p->isIdle = false;
 			p->setupTime = m_curTime;
 			m_linkWorkTimer.insert((void*)p, i);
-			trace("i = #3 %d  \n", i);
+			InfraTrace("i = #3 %d  \n", i);
 			m_iWorkTimer++;
 			return;
 		}
@@ -187,7 +187,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	p->isIdle = false;
 	p->setupTime = m_curTime;
 	m_linkWorkTimer.rise((void*)p);
-	trace("i = #4  \n");
+	InfraTrace("i = #4  \n");
 	m_iWorkTimer++;
 	return;
 }
@@ -227,7 +227,7 @@ void CTimerManger::thread_proc(void* arg)
 
 		if (timeout <= m_curTime)
 		{
-			trace("m_curTime = %d <= Timeout =%d ms \n", m_curTime, timeout);
+			InfraTrace("m_curTime = %d <= Timeout =%d ms \n", m_curTime, timeout);
 			m_mutexWorkLink.lock();
 			m_linkWorkTimer.remove((void**)&p, 0);
 			m_iWorkTimer--;
@@ -286,14 +286,14 @@ bool CTimer::setProc(const TimerProc_t & proc)
 
 bool CTimer::run()
 {
-	trace("CTimer::run \n");
+	InfraTrace("CTimer::run \n");
 	if (m_pInternal == NULL)
 	{
-		trace("m_pInternal == NULL \n");
+		InfraTrace("m_pInternal == NULL \n");
 		return false;
 	}
 	
-	trace("setup timer : %p \n", m_pInternal);
+	InfraTrace("setup timer : %p \n", m_pInternal);
 
 	CTimerManger::instance()->setupTimer(m_pInternal);
 	return true;

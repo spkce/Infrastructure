@@ -1,7 +1,8 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 #include <string>
-
+#include <map>
+#include "thread.h"
 
 void print_backtrace();
 
@@ -112,22 +113,25 @@ private:
 	std::string m_ver;
 };
 
-
-class CGlobalLog
+class CLogManager
 {
-public:
-	static CLog* instance();
 private:
-	CGlobalLog();
-	~CGlobalLog();
+	CLogManager();
+	~CLogManager();
 public:
+	static CLogManager* instance();
+	
+	CLog* getLog(std::string name);
+private:
+	Infra::CRwlock m_rwlock;
+	std::map<std::string, CLog*> m_mapLog;
 };
 
-#define Info(fmt, ...) CGlobalLog::instance()->_info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Debug(fmt, ...) CGlobalLog::instance()->_debug(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Trace(fmt, ...) CGlobalLog::instance()->_trace(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Warning(fmt, ...) CGlobalLog::instance()->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Error(fmt, ...) CGlobalLog::instance()->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Info(name, fmt, ...) CLogManager::instance()->getLog(name)->_info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Debug(name, fmt, ...) CLogManager::instance()->getLog(name)->_debug(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Trace(name, fmt, ...) CLogManager::instance()->getLog(name)->_trace(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Warning(name, fmt, ...) CLogManager::instance()->getLog(name)->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Error(name, fmt, ...) CLogManager::instance()->getLog(name)->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 
 
 

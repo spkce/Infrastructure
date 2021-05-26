@@ -29,16 +29,28 @@ CMutex::~CMutex()
 	m_pInternal = NULL;
 }
 
+/**
+* @brief 加锁，阻塞
+* @return true:成功；false:失败
+**/
 bool CMutex::lock()
 {
 	return pthread_mutex_lock(&m_pInternal->mutex) == 0 ? true : false;
 }
 
+/**
+* @brief 尝试加锁，不阻塞
+* @return true:成功；false:失败
+**/
 bool CMutex::trylock()
 {
 	return pthread_mutex_trylock(&m_pInternal->mutex) == 0 ? true : false;
 }
 
+/**
+* @brief 解锁
+* @return true:成功；false:失败
+**/
 bool CMutex::unlock()
 {
 	return pthread_mutex_unlock(&m_pInternal->mutex) == 0 ? true : false;
@@ -65,6 +77,10 @@ CCondSignal::~CCondSignal()
 	m_pInternal = NULL;
 }
 
+/**
+* @brief 阻塞
+* @return true:成功；false:失败
+**/
 bool CCondSignal::wait()
 {
 	pthread_mutex_lock(&m_pInternal->mutex);
@@ -74,10 +90,77 @@ bool CCondSignal::wait()
 	return ret == 0 ? true : false;
 }
 
-
+/**
+* @brief 解除阻塞
+* @return true:成功；false:失败
+**/
 bool CCondSignal::signal()
 {
 	return pthread_cond_signal(&m_pInternal->cond) == 0 ? true : false;
+}
+
+struct RwlockInternal
+{
+	pthread_rwlock_t rwlock;
+};
+
+CRwlock::CRwlock()
+{
+	m_pInternal = new RwlockInternal();
+	pthread_rwlock_init(&m_pInternal->rwlock, NULL);
+
+}
+
+CRwlock::~CRwlock()
+{
+	pthread_rwlock_destroy(&m_pInternal->rwlock);
+	delete m_pInternal;
+	m_pInternal = NULL;
+}
+
+/**
+* @brief 加读锁，阻塞
+* @return true:成功；false:失败
+**/
+bool CRwlock::rLock()
+{
+	return pthread_rwlock_rdlock(&m_pInternal->rwlock) == 0 ? true : false;
+}
+
+/**
+* @brief 加写锁，阻塞
+* @return true:成功；false:失败
+**/
+bool CRwlock::wLock()
+{
+	return pthread_rwlock_wrlock(&m_pInternal->rwlock) == 0 ? true : false;
+}
+
+/**
+* @brief 尝试加读锁，不阻塞
+* @return true:成功；false:失败
+**/
+bool CRwlock::tryRLock()
+{
+	return pthread_rwlock_tryrdlock(&m_pInternal->rwlock) == 0 ? true : false;
+}
+
+/**
+* @brief 尝试加写锁，不阻塞
+* @return true:成功；false:失败
+**/
+bool CRwlock::tryWLock()
+{
+	return pthread_rwlock_trywrlock(&m_pInternal->rwlock) == 0 ? true : false;
+}
+
+/**
+* @brief 解锁
+* @return true:成功；false:失败
+**/
+bool CRwlock::unLock()
+{
+	return pthread_rwlock_unlock(&m_pInternal->rwlock) == 0 ? true : false;
 }
 
 enum 
@@ -112,10 +195,10 @@ void* ThreadInternal::proc(void* arg)
 	bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
 
-	trace("thread proc run\n");
+	InfraTrace("thread proc run\n");
 	pInternal->cond.signal();
 	pInternal->state = THREAD_EXCUTE;
-	trace("thread proc signal\n");
+	InfraTrace("thread proc signal\n");
 	do
 	{
 		pInternal->mutex.lock();
@@ -131,7 +214,7 @@ void* ThreadInternal::proc(void* arg)
 		if (isSuspend)
 		{
 			pInternal->state = THREAD_SUSPEND;
-			trace("thread proc wait\n");
+			InfraTrace("thread proc wait\n");
 			pInternal->cond.signal();
 			pInternal->cond.wait();
 			pInternal->state = THREAD_EXCUTE;
@@ -180,14 +263,14 @@ int IThread::create(struct ThreadInternal* pInternal)
 	if (err)
 	{
 		//线程创建失败
-		trace("create pthread error: %d\n",err);
+		InfraTrace("create pthread error: %d\n",err);
 		return err;
 	}
 
 	//设置线程为可分离状态，线程运行结束后会自动释放资源。
 	if (pthread_detach(pInternal->handle))
 	{
-		trace("detach pthread error: %d\n",err);
+		InfraTrace("detach pthread error: %d\n",err);
 	}
 	return err;
 }
@@ -224,7 +307,7 @@ CThread::~CThread()
 
 void CThread::run(bool isLoop)
 {
-	trace("isLoop: %d\n", isLoop);
+	InfraTrace("isLoop: %d\n", isLoop);
 	if (m_pInternal->state == THREAD_EXIT)
 	{
 		return ;
@@ -344,7 +427,7 @@ bool CThread::isTreadCreated() const
 
 bool CThread::createTread(bool isBlock)
 {
-	trace("isBlock: %d\n", isBlock);
+	InfraTrace("isBlock: %d\n", isBlock);
 	if (isTreadCreated())
 	{
 		//线程已经运行
@@ -355,14 +438,14 @@ bool CThread::createTread(bool isBlock)
 	{
 		//线程创建失败
 		m_pInternal->state = THREAD_EXIT;
-		trace("create pthread error\n");
+		InfraTrace("create pthread error\n");
 		return false;
 	}
 
 	m_pInternal->state = THREAD_READY;
 	if (isBlock)
 	{
-		trace("create pthread error\n");
+		InfraTrace("create pthread error\n");
 		m_pInternal->cond.wait();
 	}
 

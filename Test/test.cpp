@@ -11,10 +11,10 @@ int main()
 {
 	//printf("***************packet_test*************\n");
 	//packet_test();
-	//printf("****************Log_test***************\n");
-	//Log_test();
+	printf("****************Log_test***************\n");
+	Log_test();
 	//printf("****************thread_test***************\n");
-	thread_test();
+	//thread_test();
 	//printf("****************link_test***************\n");
 	//link_test();
 	printf("**************callback_test***************\n");

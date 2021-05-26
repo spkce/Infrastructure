@@ -7,9 +7,9 @@ namespace Infra
 void InteralPrint(const char* file, int line, const char* func, const char* fmt, ...) __attribute__((format(printf, 4, 5)));
 
 #ifdef INFRA_LOG
-#define trace(fmt, ...) InteralPrint(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define InfraTrace(fmt, ...) InteralPrint(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
 #else
-#define trace(fmt, ...)
+#define InfraTrace(fmt, ...)
 #endif
 
 } //Infra

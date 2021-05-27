@@ -6,7 +6,7 @@
 #include <errno.h>
 #include "TFuncation.h"
 #include "link.h"
-#include "logInternal.h"
+#include "LogInternal.h"
 
 namespace Infra
 {

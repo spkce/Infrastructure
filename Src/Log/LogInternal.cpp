@@ -5,7 +5,7 @@
 #include "Log.h"
 #include <stdarg.h>
 #include "thread.h"
-#include "logInternal.h"
+#include "LogInternal.h"
 
 namespace Infra
 {

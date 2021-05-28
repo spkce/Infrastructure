@@ -160,6 +160,12 @@ long CTime::getThreadTimeMSecond()
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
+
+void covertAbsTime(int ms, struct timespec *tp)
+{
+	unsigned long long ms = getRealTimeMSecond();
+}
+
 void CTime::delay_ms(unsigned int ms)
 {
 	struct timeval tv;
@@ -170,5 +176,56 @@ void CTime::delay_ms(unsigned int ms)
 	{
 		err = select(0,NULL,NULL,NULL,&tv);
 	}while (err<0 && errno==EINTR);
+}
+
+
+static inline VOID sys_timespec_get(int iWaitMs, struct timespec *tp)
+{
+    time_t sec;
+    long long int nsec;
+
+    if (iWaitMs == -1)
+    {
+        nsec = 0;
+    }
+    else
+    {
+        nsec = iWaitMs;
+        nsec *= 1000000LL;
+    }
+
+    if (clock_gettime(CLOCK_REALTIME, tp) == -1)
+    {
+        SYS_POSIX_ERROR("getTimespec: clock_gettime call fail, error %d(%s)\n", errno, strerror(errno));
+        tp->tv_sec = time(NULL) + 1;
+        tp->tv_nsec = 0;
+    }
+    else
+    {
+        sec = time(NULL) + 1;
+        if (abs(tp->tv_sec - sec) > 30)
+        {
+            tp->tv_sec = sec;
+            tp->tv_nsec = 0;
+        }
+    }
+
+    nsec += tp->tv_nsec;
+    SYS_POSIX_INFO("getTimespec: current time sec = %ld, time = %ld, nsec = %ld, total nsec = %lld\n",
+            tp->tv_sec, time(NULL)+1, tp->tv_nsec, nsec);
+
+
+    sec = 0;
+    if (nsec >= NSEC2SEC)
+    {
+        sec = nsec / NSEC2SEC;
+        nsec = nsec % NSEC2SEC;
+    }
+    tp->tv_sec += sec;
+    tp->tv_nsec = nsec;
+    SYS_POSIX_INFO("getTimespec: after time sec = %ld, time = %ld, nsec = %ld\n",
+            tp->tv_sec, time(NULL)+1, tp->tv_nsec);
+
+    return;
 }
 }//Infra

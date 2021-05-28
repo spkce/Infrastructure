@@ -79,12 +79,14 @@ public:
 	{
 		type_onlyLog = 0,
 		type_fileMsg,
-		type_modMsg
+		type_modMsg,
+		type_modVer
 	};
 public:
 	CLog(int logType, std::string name, std::string ver);
 	~CLog();
 	int setLogLevel(int lv);
+	int setLogType(int type);
 	int getLogLevel();
 	int getLogType();
 	std::string getName();

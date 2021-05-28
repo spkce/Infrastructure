@@ -57,6 +57,7 @@ public:
 	//获取线程运行时间, 单位:纳秒
 	static long getThreadTimeMSecond();
 
+	static void covertAbsTime
 	static void delay_ms(unsigned int ms);
 private:
 };

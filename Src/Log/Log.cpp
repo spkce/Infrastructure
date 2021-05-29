@@ -32,13 +32,13 @@ do{																					\
 	switch(m_logType)																							\
 	{																											\
 		case type_fileMsg:																						\
-		n = snprintf(buffer, sizeof(buffer) - 1, "%s:%d %s ", (file), (line), (func));							\
+			n = snprintf(buffer, sizeof(buffer) - 1, "%s:%d %s ", (file), (line), (func));						\
 			break;																								\
 		case type_modMsg:																						\
-		n = snprintf(buffer, sizeof(buffer) - 1, "[%s] %s:%d %s ", (name), (file), (line), (func));				\
+			n = snprintf(buffer, sizeof(buffer) - 1, "[%s] %s:%d %s ", (name), (file), (line), (func));			\
 			break;																								\
 		case type_modVer:																						\
-		n = snprintf(buffer, sizeof(buffer) - 1, "[%s-%s] %s:%d %s ", (name), (ver), (file), (line), (func));	\
+			n = snprintf(buffer, sizeof(buffer) - 1, "[%s-%s] %s:%d %s ", (name), (ver), (file), (line), (func));\
 			break;																								\
 		case type_onlyLog:																						\
 		default:																								\

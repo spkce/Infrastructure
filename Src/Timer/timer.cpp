@@ -17,13 +17,13 @@ struct TimerInternal
 {
 	TimerInternal();
 	~TimerInternal();
-	inline long getTimeout()
+	inline unsigned long long getTimeout()
 	{
 		return setupTime + (delay == 0 ? period : delay);
 	}
 	Infra::CMutex mutex;
 	CTimer::TimerProc_t proc;
-	long setupTime;
+	unsigned long long setupTime;
 	int times;
 	unsigned int delay;
 	unsigned int period;
@@ -76,7 +76,7 @@ public:
 private:
 	void allocateIdleTimer(unsigned int n);
 	void thread_proc(void* arg);
-	static long getCurTime();
+	static unsigned long long getCurTime();
 
 private:
 	CLink m_linkWorkTimer;
@@ -88,7 +88,7 @@ private:
 	CMutex m_mutexWorkLink;
 	CMutex m_mutexIdleLink;
 	CMutex m_mutexCurTime;
-	long m_curTime;
+	unsigned long long m_curTime;
 	CThread m_thread;
 };
 
@@ -143,7 +143,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 
 	m_curTime = getCurTime();
 	
-	InfraTrace("m_curTime = %d ms \n", m_curTime);
+	InfraTrace("m_curTime = %llu ms \n", m_curTime);
 	
 	if (iEmployLink == 0)
 	{
@@ -169,7 +169,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 			m_iWorkTimer++;
 			return;
 		}
-		InfraTrace("pTemp->getTimeout() = %d \n", pTemp->getTimeout());
+		InfraTrace("pTemp->getTimeout() = %llu \n", pTemp->getTimeout());
 		InfraTrace("iTemp = %d \n", iTemp);
 		//按timeout时间查找位置
 		if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
@@ -207,7 +207,7 @@ void CTimerManger::thread_proc(void* arg)
 {
 	TimerInternal* p = NULL;
 
-	long timeout = 0;
+	unsigned long long timeout = 0;
 	//while(loop())
 	do
 	{
@@ -227,7 +227,7 @@ void CTimerManger::thread_proc(void* arg)
 
 		if (timeout <= m_curTime)
 		{
-			InfraTrace("m_curTime = %d <= Timeout =%d ms \n", m_curTime, timeout);
+			InfraTrace("m_curTime = %llu <= Timeout =%llu ms \n", m_curTime, timeout);
 			m_mutexWorkLink.lock();
 			m_linkWorkTimer.remove((void**)&p, 0);
 			m_iWorkTimer--;
@@ -242,7 +242,7 @@ void CTimerManger::thread_proc(void* arg)
 	} while(0);
 }
 
-long CTimerManger::getCurTime()
+unsigned long long CTimerManger::getCurTime()
 {
 	return CTime::getSystemTimeMSecond();
 }

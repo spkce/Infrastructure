@@ -1,16 +1,17 @@
 #ifndef __MSG_QUEUE_H__
 #define __MSG_QUEUE_H__
 
-#include <string>
-#include <mqueue.h>
+#include "stdio.h"
 
 namespace Infra
 {
 
+struct QueueInternal;
+
 class CMsgQueue
 {
 public:
-	CMsgQueue(std::string name, int maxMsg, int maxMsgLen);
+	CMsgQueue(const char* name, int maxMsg, int maxMsgLen);
 	virtual ~CMsgQueue();
 
 public:
@@ -18,8 +19,7 @@ public:
 	bool output(char *msg, size_t len, int timeout = -1, unsigned int *priop = NULL);
 
 private:
-	mqd_t m_mqId;
-	std::string m_name;
+	struct QueueInternal * m_pInternal;
 };
 
 } //Infra

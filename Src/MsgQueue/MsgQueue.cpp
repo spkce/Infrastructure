@@ -62,7 +62,7 @@ bool CMsgQueue::input(const char *msg, size_t len, int timeout, unsigned int pri
 	}
 }
 
-bool CMsgQueue::output(char *msg, size_t len, int timeout, unsigned int *priop)
+int CMsgQueue::output(char *msg, size_t len, int timeout, unsigned int *priop)
 {
 	if (msg == NULL || m_pInternal->qId < 0)
 	{
@@ -72,13 +72,18 @@ bool CMsgQueue::output(char *msg, size_t len, int timeout, unsigned int *priop)
 
 	if (timeout < 0)
 	{
-		return mq_receive(m_pInternal->qId, msg, len, priop) == 0;
+		return mq_receive(m_pInternal->qId, msg, len, priop);
+	}
+	else if (timeout == 0)
+	{
+		struct timespec absTime = {0};
+		return mq_timedreceive(m_pInternal->qId, msg, len, priop, &absTime);
 	}
 	else
 	{
 		struct timespec absTime = {0};
 		CTime::covertRealTime((unsigned int)timeout, &absTime);
-		return mq_timedreceive(m_pInternal->qId, msg, len, priop, &absTime) == 0;
+		return mq_timedreceive(m_pInternal->qId, msg, len, priop, &absTime);
 	}
 }
 

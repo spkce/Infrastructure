@@ -16,7 +16,7 @@ public:
 
 public:
 	bool input(const char *msg, size_t len, int timeout = -1, unsigned int prio = 0);
-	bool output(char *msg, size_t len, int timeout = -1, unsigned int *priop = NULL);
+	int output(char *msg, size_t len, int timeout = -1, unsigned int *priop = NULL);
 
 private:
 	struct QueueInternal * m_pInternal;

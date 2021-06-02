@@ -12,7 +12,7 @@ int main()
 	//printf("***************packet_test*************\n");
 	//packet_test();
 	printf("****************Log_test***************\n");
-	Log_test();
+	//Log_test();
 	//printf("****************thread_test***************\n");
 	//thread_test();
 	//printf("****************link_test***************\n");
@@ -20,7 +20,7 @@ int main()
 	printf("**************callback_test***************\n");
 	//callback_test();
 	printf("**************timer_test***************\n");
-	//timer_test();
+	timer_test();
 	
 	return 0;
 }

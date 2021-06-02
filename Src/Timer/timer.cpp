@@ -184,7 +184,7 @@ void CTimerManger::setupTimer(TimerInternal* p)
 		{
 			pTemp = (TimerInternal*)m_linkWorkTimer.get(i);
 			//按timeout时间查找位置
-			if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
+			if (pTemp->getTimeout() > (m_curTime + iTemp))
 			{
 				m_linkWorkTimer.insert((void*)p, i);
 				InfraTrace("insert work link %d\n", i);
@@ -245,7 +245,7 @@ void CTimerManger::thread_proc(void* arg)
 			p->mutex.lock();
 			isWork = p->times != 0;
 			p->mutex.unlock();
-			
+			InfraTrace("timer: %s times: %d\n", p->name, p->times);
 			if (!p->proc.isEmpty() && isWork)
 			{
 				p->status = emTimerWork;
@@ -339,13 +339,15 @@ bool CTimer::run()
 
 bool CTimer::stop()
 {
-	if (m_pInternal->status > emTimerIdle)
+	if (m_pInternal->status <= emTimerIdle)
 	{
+		InfraTrace("timer: %s stop fail\n", m_pInternal->name);
 		return false;
 	}
 	m_pInternal->mutex.lock();
 	m_pInternal->times = 0;
 	m_pInternal->mutex.unlock();
+	InfraTrace("timer: %s stop \n", m_pInternal->name);
 	return true;
 }
 

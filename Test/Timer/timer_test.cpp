@@ -52,8 +52,11 @@ void timer_test(void)
 	CTimerTest timer;
 	timer.test();
 	sleep(10);
+	printf("timer 1 stop");
 	timer.stop(1);
 	sleep(5);
-
+	printf("timer 2 stop");
+	timer.stop(2);
+	sleep(5);
 
 }

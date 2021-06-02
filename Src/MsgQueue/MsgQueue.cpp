@@ -6,6 +6,8 @@
 #include "ctime.h"
 #include "LogInternal.h"
 #include <string>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace Infra
 {
@@ -26,6 +28,28 @@ CMsgQueue::CMsgQueue(const char* name, int maxMsg, int maxMsgLen)
 	attr.mq_maxmsg = maxMsg;
 
 	m_pInternal->name += name;
+	InfraTrace("create queue: %s \n", m_pInternal->name.c_str());
+
+	mq_unlink(m_pInternal->name.c_str());
+	m_pInternal->qId = mq_open(m_pInternal->name.c_str(), O_CREAT | O_RDWR | O_EXCL, 0664, &attr);
+	if (m_pInternal->qId < 0)
+	{
+		InfraTrace("create queue: %s fail\n", m_pInternal->name.c_str());
+	}
+}
+
+CMsgQueue::CMsgQueue(int maxMsg, int maxMsgLen)
+{
+	char name[32] = {0};
+	m_pInternal = new QueueInternal();
+	// PID + 堆区地址 可以保证该名字在系统中唯一
+	snprintf(name, size_t(name), "%d_%p", getpid(), m_pInternal);
+	
+	struct mq_attr attr = {0};
+	attr.mq_msgsize = maxMsgLen;
+	attr.mq_maxmsg = maxMsg;
+	m_pInternal->name += name;
+
 	InfraTrace("create queue: %s \n", m_pInternal->name.c_str());
 
 	mq_unlink(m_pInternal->name.c_str());

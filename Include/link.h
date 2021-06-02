@@ -27,7 +27,7 @@ public:
 	CLink();
 	virtual ~CLink();
 	/**
-	* @brief 向链表插入一个负载
+	* @brief 向链表插入一个负载，前向插入，插入后负载的位置变为pos
 	* @param payload 负载指针
 	* @param pos 插入的位置
 	* @return 成功：目前节点的个数；失败，-1

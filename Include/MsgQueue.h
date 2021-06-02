@@ -12,6 +12,7 @@ class CMsgQueue
 {
 public:
 	CMsgQueue(const char* name, int maxMsg, int maxMsgLen);
+	CMsgQueue(int maxMsg, int maxMsgLen);
 	virtual ~CMsgQueue();
 
 public:

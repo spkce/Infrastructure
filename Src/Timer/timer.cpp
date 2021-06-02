@@ -13,22 +13,34 @@
 namespace Infra
 {
 
+enum
+{
+	emTimerUnInit = 0,
+	emTimerIdle,
+	emTimerWait,
+	emTimerWork,
+};
+
+#define NAME_LEN 32
 struct TimerInternal
 {
 	TimerInternal();
 	~TimerInternal();
+	void clear();
 	inline unsigned long long getTimeout()
 	{
 		return setupTime + (delay == 0 ? period : delay);
 	}
 	Infra::CMutex mutex;
 	CTimer::TimerProc_t proc;
+
 	unsigned long long setupTime;
 	int times;
 	unsigned int delay;
 	unsigned int period;
+	int status;
 	bool isIdle;
-	char name[32];
+	char name[NAME_LEN];
 	
 };
 
@@ -36,17 +48,29 @@ TimerInternal::TimerInternal()
 :mutex()
 ,proc()
 ,setupTime(0)
-,times(-1)
+,times(0)
 ,delay(0)
 ,period(0)
+,status(emTimerUnInit)
 ,isIdle(true)
 {
-	memset(name, 0, sizeof(name));
+	memset(name, 0, NAME_LEN);
 }
 
 TimerInternal::~TimerInternal()
 {
 
+}
+
+void TimerInternal::clear()
+{
+	setupTime = 0;
+	times = 0;
+	delay = 0;
+	period = 0;
+	status = emTimerUnInit;
+	isIdle = true;
+	memset(name, 0, NAME_LEN);
 }
 
 class CTimerManger
@@ -72,6 +96,7 @@ private:
 	~CTimerManger();
 public:
 	TimerInternal* allocateTimer();
+	void backTimer(TimerInternal* p);
 	void setupTimer(TimerInternal* p);
 private:
 	void allocateIdleTimer(unsigned int n);
@@ -81,13 +106,8 @@ private:
 private:
 	CLink m_linkWorkTimer;
 	CLink m_linkIdleTimer;
-	
-	unsigned int m_iWorkTimer;
-	unsigned int m_iIdleTimer;
-
 	CMutex m_mutexWorkLink;
 	CMutex m_mutexIdleLink;
-	CMutex m_mutexCurTime;
 	unsigned long long m_curTime;
 	CThread m_thread;
 };
@@ -95,13 +115,10 @@ private:
 CTimerManger::CTimerManger()
 :m_linkWorkTimer()
 ,m_linkIdleTimer()
-,m_iWorkTimer(0)
-,m_iIdleTimer(PER_TIMER_ALLOCATE)
 ,m_mutexWorkLink()
 ,m_mutexIdleLink()
-,m_mutexCurTime()
 {
-	allocateIdleTimer(m_iIdleTimer);
+	allocateIdleTimer(PER_TIMER_ALLOCATE);
 
 	m_curTime = getCurTime();
 	
@@ -127,8 +144,15 @@ TimerInternal* CTimerManger::allocateTimer()
 	}
 
 	m_linkIdleTimer.reduce((void**)&p);
-	m_iIdleTimer--;
+
 	return p;
+}
+
+void CTimerManger::backTimer(TimerInternal* p)
+{
+	p->clear();
+	Infra::CGuard<Infra::CMutex> guard(m_mutexIdleLink);
+	m_linkIdleTimer.rise((void*)p);
 }
 
 void CTimerManger::setupTimer(TimerInternal* p)
@@ -136,60 +160,45 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	TimerInternal* pTemp = NULL;
 	unsigned int i = 0;
 	unsigned int iTemp = (p->delay !=0) ? p->delay : p->period;
-	InfraTrace("setupTimer name: %s \n", p->name);
+	InfraTrace("setup Timer name: %s\n", p->name);
 	Infra::CGuard<Infra::CMutex> guard(m_mutexWorkLink);
 
 	const unsigned int iEmployLink = m_linkWorkTimer.linkSize();
 
 	m_curTime = getCurTime();
-	
-	InfraTrace("m_curTime = %llu ms \n", m_curTime);
-	
+	InfraTrace("current timer num = %d\n", iEmployLink);
+	InfraTrace("current time = %llu ms\n", m_curTime);
+
 	if (iEmployLink == 0)
 	{
-		p->isIdle = false;
-		p->setupTime = m_curTime;
-		m_linkWorkTimer.insert((void*)p, i);
-		InfraTrace("i = #1 %d  \n", i);
-		m_iWorkTimer++;
-		return;
-	}
-	InfraTrace("iEmployLink = %d \n", iEmployLink);
-	for (i = 0; i < iEmployLink; i++)
-	{
-		InfraTrace("i = %d \n", i);
-		pTemp = (TimerInternal*)m_linkWorkTimer.get(i);
 		//此定时器是第一个装载
-		if (pTemp == NULL)
-		{
-			p->isIdle = false;
-			p->setupTime = m_curTime;
-			m_linkWorkTimer.rise((void*)p);
-			InfraTrace("i = #2 %d  \n", i);
-			m_iWorkTimer++;
-			return;
-		}
-		InfraTrace("pTemp->getTimeout() = %llu \n", pTemp->getTimeout());
-		InfraTrace("iTemp = %d \n", iTemp);
-		//按timeout时间查找位置
-		if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
-		{
-			p->isIdle = false;
-			p->setupTime = m_curTime;
-			m_linkWorkTimer.insert((void*)p, i);
-			InfraTrace("i = #3 %d  \n", i);
-			m_iWorkTimer++;
-			return;
-		}
+		m_linkWorkTimer.rise((void*)p);
+		InfraTrace("insert work link start\n");
 	}
 
-	//此定时器timeout时间最长
+	if (iEmployLink > 0)
+	{
+		for (i = 0; i < iEmployLink; i++)
+		{
+			//按timeout时间查找位置
+			if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
+			{
+				m_linkWorkTimer.insert((void*)p, i);
+				InfraTrace("insert work link %d\n", i);
+				break;
+			}
+		}
+	}
+	else
+	{
+		//此定时器timeout时间最长，加在末尾
+		m_linkWorkTimer.rise((void*)p);
+		InfraTrace("insert work link end\n");
+	}
+
 	p->isIdle = false;
 	p->setupTime = m_curTime;
-	m_linkWorkTimer.rise((void*)p);
-	InfraTrace("i = #4  \n");
-	m_iWorkTimer++;
-	return;
+	p->status = emTimerWait;
 }
 
 void CTimerManger::allocateIdleTimer(unsigned int n)
@@ -199,14 +208,13 @@ void CTimerManger::allocateIdleTimer(unsigned int n)
 	for (unsigned int i = 0; i < n; i++)
 	{
 		m_linkIdleTimer.rise((void*)(p + i));
-		m_iIdleTimer++;
 	}
 }
 
 void CTimerManger::thread_proc(void* arg)
 {
 	TimerInternal* p = NULL;
-
+	bool isWork;
 	unsigned long long timeout = 0;
 	//while(loop())
 	do
@@ -227,17 +235,36 @@ void CTimerManger::thread_proc(void* arg)
 
 		if (timeout <= m_curTime)
 		{
-			InfraTrace("m_curTime = %llu <= Timeout =%llu ms \n", m_curTime, timeout);
+			InfraTrace("curTime = %llu <= Time out：%llu ms \n", m_curTime, timeout);
 			m_mutexWorkLink.lock();
 			m_linkWorkTimer.remove((void**)&p, 0);
-			m_iWorkTimer--;
 			m_mutexWorkLink.unlock();
-			p->proc((int)m_curTime);
-			
-			//重新插入
-			setupTimer(p);
-		}
 
+			p->mutex.lock();
+			isWork = p->times != 0;
+			p->mutex.unlock();
+			
+			if (!p->proc.isEmpty() && isWork)
+			{
+				p->status = emTimerWork;
+				p->proc((int)m_curTime);
+				p->status = emTimerWait;
+
+				p->mutex.lock();
+				isWork = (p->times < 0 || (--p->times) > 0);
+				p->mutex.unlock();
+
+				if (isWork)
+				{
+					//重新插入工作链表
+					setupTimer(p);
+				}
+				else 
+				{
+					p->status = emTimerIdle;
+				}
+			}
+		}
 		usleep(1000);
 	} while(0);
 }
@@ -247,20 +274,28 @@ unsigned long long CTimerManger::getCurTime()
 	return CTime::getSystemTimeMSecond();
 }
 
+CTimer::CTimer()
+{
+	m_pInternal = CTimerManger::instance()->allocateTimer();
+	m_pInternal->status = emTimerIdle;
+	snprintf(m_pInternal->name, NAME_LEN, "timer_%p", this);
+}
+
 CTimer::CTimer(const char* name)
 {
 	m_pInternal = CTimerManger::instance()->allocateTimer();
-
-	strncpy(m_pInternal->name, name, sizeof(m_pInternal->name) -1 );
+	m_pInternal->status = emTimerIdle;
+	strncpy(m_pInternal->name, name, NAME_LEN - 1);
 }
 
 CTimer::~CTimer()
 {
+	CTimerManger::instance()->backTimer(m_pInternal);
 }
 
 bool CTimer::setTimerAttr(const TimerProc_t & proc, unsigned int period, unsigned int delay, int times)
 {
-	if (m_pInternal == NULL)
+	if (m_pInternal == NULL || times == 0)
 	{
 		return false;
 	}
@@ -296,6 +331,18 @@ bool CTimer::run()
 	InfraTrace("setup timer : %p \n", m_pInternal);
 
 	CTimerManger::instance()->setupTimer(m_pInternal);
+	return true;
+}
+
+bool CTimer::stop()
+{
+	if (m_pInternal->status > emTimerIdle)
+	{
+		return false;
+	}
+	m_pInternal->mutex.lock();
+	m_pInternal->times = 0;
+	m_pInternal->mutex.unlock();
 	return true;
 }
 

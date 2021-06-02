@@ -164,39 +164,40 @@ void CTimerManger::setupTimer(TimerInternal* p)
 	InfraTrace("setup Timer name: %s\n", p->name);
 	Infra::CGuard<Infra::CMutex> guard(m_mutexWorkLink);
 
-	const unsigned int iEmployLink = m_linkWorkTimer.linkSize();
+	const unsigned int uWorkTimerNum = m_linkWorkTimer.linkSize();
 
 	m_curTime = getCurTime();
-	InfraTrace("current timer num = %d\n", iEmployLink);
+	InfraTrace("current work timer num = %d\n", uWorkTimerNum);
 	InfraTrace("current time = %llu ms\n", m_curTime);
 
-	if (iEmployLink == 0)
+	if (uWorkTimerNum == 0)
 	{
 		//此定时器是第一个装载
 		m_linkWorkTimer.rise((void*)p);
 		InfraTrace("insert work link start\n");
+		goto timer_set;
 	}
 
-	if (iEmployLink > 0)
+	if (uWorkTimerNum > 0)
 	{
-		for (i = 0; i < iEmployLink; i++)
+		for (i = 0; i < uWorkTimerNum; i++)
 		{
+			pTemp = (TimerInternal*)m_linkWorkTimer.get(i);
 			//按timeout时间查找位置
 			if ((unsigned int)(pTemp->getTimeout() - m_curTime) > iTemp)
 			{
 				m_linkWorkTimer.insert((void*)p, i);
 				InfraTrace("insert work link %d\n", i);
-				break;
+				goto timer_set;
 			}
 		}
-	}
-	else
-	{
+
 		//此定时器timeout时间最长，加在末尾
 		m_linkWorkTimer.rise((void*)p);
 		InfraTrace("insert work link end\n");
 	}
 
+timer_set:
 	p->isIdle = false;
 	p->setupTime = m_curTime;
 	p->status = emTimerWait;

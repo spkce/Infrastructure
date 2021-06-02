@@ -42,7 +42,7 @@ CMsgQueue::CMsgQueue(int maxMsg, int maxMsgLen)
 {
 	char name[32] = {0};
 	m_pInternal = new QueueInternal();
-	// PID + 堆区地址 可以保证该名字在系统中唯一
+	// PID + 鍫嗗尯鍦板潃 鍙互淇濊瘉璇ュ悕瀛楀湪绯荤粺涓敮涓�
 	snprintf(name, size_t(name), "%d_%p", getpid(), m_pInternal);
 	
 	struct mq_attr attr = {0};

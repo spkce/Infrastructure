@@ -137,20 +137,21 @@ TimerInternal* CTimerManger::allocateTimer()
 {
 	TimerInternal* p = NULL;
 
-	Infra::CGuard<Infra::CMutex> guard(m_mutexIdleLink);
-	if (m_linkIdleTimer.linkSize() == 0)
 	{
-		allocateIdleTimer(PER_TIMER_ALLOCATE);
+		Infra::CGuard<Infra::CMutex> guard(m_mutexIdleLink);
+		if (m_linkIdleTimer.linkSize() == 0)
+		{
+			allocateIdleTimer(PER_TIMER_ALLOCATE);
+		}
+
+		m_linkIdleTimer.reduce((void**)&p);
 	}
-
-	m_linkIdleTimer.reduce((void**)&p);
-
+	p->clear();
 	return p;
 }
 
 void CTimerManger::backTimer(TimerInternal* p)
 {
-	p->clear();
 	Infra::CGuard<Infra::CMutex> guard(m_mutexIdleLink);
 	m_linkIdleTimer.rise((void*)p);
 }
@@ -290,6 +291,7 @@ CTimer::CTimer(const char* name)
 
 CTimer::~CTimer()
 {
+	stop();
 	CTimerManger::instance()->backTimer(m_pInternal);
 }
 

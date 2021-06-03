@@ -57,19 +57,19 @@ public:
 			if (i == 1)
 			{
 				printf("\033[35m""%s:%d %s i=%d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__,i);
-				ret = RWlock.rLock();//第一次读锁的加锁
+				ret = RWlock.rLock();//????ζ????????
 				printf("\033[35m""%s:%d %s read lock : %d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__, ret);
 			}
 			else if (i == 5)
 			{
 				printf("\033[35m""%s:%d %s i=%d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__,i);
-				ret = RWlock.unLock(); //第一次读锁的解锁
+				ret = RWlock.unLock(); //????ζ????????
 				printf("\033[35m""%s:%d %s rw unlock : %d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__, ret);
 			}
 			else if (i == 9)
 			{
 				printf("\033[35m""%s:%d %s i=%d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__,i);
-				ret = RWlock.unLock();//第二次读锁的解锁
+				ret = RWlock.unLock();//????ζ????????
 				printf("\033[35m""%s:%d %s rw unlock : %d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__, ret);
 			}
 			sleep(1);
@@ -84,19 +84,19 @@ public:
 			if (i == 2)
 			{
 				printf("\033[35m""%s:%d %s i=%d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__,i);
-				ret = RWlock.rLock();//第二次读锁的加锁
+				ret = RWlock.rLock();//????ζ????????
 				printf("\033[35m""%s:%d %s read lock : %d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__, ret);
 			}
 			else if (i == 3)
 			{
 				printf("\033[35m""%s:%d %s i=%d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__,i);
-				ret = RWlock.wLock();//第一次写锁的加锁
+				ret = RWlock.wLock();//?????д???????
 				printf("\033[35m""%s:%d %s rw wLock : %d""\033[0m\n",__FILE__, __LINE__, __FUNCTION__, ret);
 			}
 
 			sleep(1);
 		};
-		ret = RWlock.unLock();//第一次写锁的解锁
+		ret = RWlock.unLock();//?????д???????
 		m_cond.signal();
 	}
 };
@@ -119,6 +119,38 @@ public:
 	void thread_proc(void* a)
 	{
 		printf("\033[35m""CThreadTest3 :: thread_proc""\033[0m\n");
+		sleep(1);
+	}
+};
+
+class CThreadTest4
+{
+	Infra::CThread m_thread;
+public:
+	CThreadTest4()
+	{
+		m_thread.attachProc(Infra::ThreadProc_t(&CThreadTest4::thread_proc, this));
+		m_thread.createTread();
+	}
+	
+	~CThreadTest4()
+	{
+		m_thread.stop(true);
+	}
+	void detory()
+	{
+		printf("CThreadTest4::detory\n");
+		delete this;
+	}
+	void start()
+	{
+		printf("CThreadTest4::start\n");
+		m_thread.run();
+	}
+
+	void thread_proc(void* a)
+	{
+		printf("\033[35m""CThreadTest4 :: thread_proc""\033[0m\n");
 		sleep(1);
 	}
 };
@@ -148,10 +180,20 @@ void thread_test(void)
 
 	CThreadTest2 test2;
 	m_cond.wait();
-	*/
+	
 	CThreadTest3 test3;
 	sleep(5);
 	test3.start();
+	sleep(10);
+	*/
+
+	for (int i = 0; i < 10; i++)
+	{
+		CThreadTest4* p = new CThreadTest4;
+		p->start();
+		//sleep(1);
+		p->detory();
+	}
 	sleep(10);
 	printf("thread_test retrun\n");
 }

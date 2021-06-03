@@ -188,6 +188,7 @@ struct ThreadInternal
 	static void* proc(void* arg);
 };
 
+
 void* ThreadInternal::proc(void* arg)
 {
 	bool isLoop = true;
@@ -195,7 +196,7 @@ void* ThreadInternal::proc(void* arg)
 	bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
 
-	InfraTrace("thread proc run\n");
+	InfraTrace("thread proc run:%p\n", pInternal);
 	pInternal->cond.signal();
 	pInternal->state = THREAD_EXCUTE;
 	InfraTrace("thread proc signal\n");
@@ -222,10 +223,16 @@ void* ThreadInternal::proc(void* arg)
 			continue;
 		}
 		
-		pInternal->state = THREAD_WORK;
-
-		if (pInternal->owner != NULL || !pInternal->owner->m_proc.isEmpty())
+		if (pInternal->owner == NULL)
 		{
+			InfraTrace("IThread Error\n");
+			pInternal->state = THREAD_EXIT;
+			return NULL;
+		}
+
+		if (!pInternal->owner->m_proc.isEmpty())
+		{
+			pInternal->state = THREAD_WORK;
 			pInternal->owner->m_proc(arg);
 		}
 		else
@@ -236,13 +243,15 @@ void* ThreadInternal::proc(void* arg)
 		}
 		
 		pInternal->state = THREAD_EXCUTE;
-
+		printf("#2 : %p\n", pInternal);
 		pInternal->mutex.lock();
 		isLoop = pInternal->bLoop;
 		pInternal->mutex.unlock();
 	} while (isLoop);
 	
 	pInternal->state = THREAD_EXIT;
+	
+	printf("internal proc exit : %p\n", pInternal);
 
 	return NULL;
 }
@@ -269,9 +278,9 @@ int IThread::create(struct ThreadInternal* pInternal)
 	}
 
 	//设置线程为可分离状态，线程运行结束后会自动释放资源。
-	if (pthread_detach(pInternal->handle))
+	//if (pthread_detach(pInternal->handle))
 	{
-		InfraTrace("detach pthread error: %d\n",err);
+		//InfraTrace("detach pthread error: %d\n",err);
 	}
 	return err;
 }
@@ -283,6 +292,7 @@ struct ThreadInternal* IThread::allocateThread()
 
 void IThread::releaseThread(struct ThreadInternal* pInternal)
 {
+	InfraTrace("delete thread internal:%p\n", pInternal);
 	delete pInternal;
 }
 
@@ -300,7 +310,7 @@ CThread::CThread()
 
 CThread::~CThread()
 {
-	stop();
+	stop(true);
 	
 	releaseThread(m_pInternal);
 	m_pInternal = NULL;
@@ -354,6 +364,7 @@ void CThread::pasue()
 
 bool CThread::stop(bool isBlock)
 {
+	InfraTrace("isBlock:%d\n",isBlock);
 	if (m_pInternal->state == THREAD_INIT || m_pInternal->state == THREAD_EXIT)
 	{
 		return false;
@@ -370,16 +381,19 @@ bool CThread::stop(bool isBlock)
 		//此函數由线程执行体调用，不等待直接退出
 		return true;
 	}
-
+	printf("cur state = %d\n", m_pInternal->state);
 	if (m_pInternal->state == THREAD_SUSPEND || m_pInternal->state == THREAD_READY)
 	{
+		InfraTrace("signal\n");
 		m_pInternal->cond.signal();
 	}
 
 	if (isBlock)
 	{
 		//使用条件变量，等待线程退出
+		InfraTrace("wait proc exit:%p\n",m_pInternal);
 		pthread_join(m_pInternal->handle, NULL);
+		InfraTrace("proc exit:%p\n",m_pInternal);
 	}
 
 	return true;

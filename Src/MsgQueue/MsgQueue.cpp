@@ -68,7 +68,13 @@ CMsgQueue::~CMsgQueue()
 
 bool CMsgQueue::input(const char *msg, size_t len, int timeout, unsigned int prio)
 {
-	if (msg == NULL || m_pInternal->qId < 0)
+	if (msg == NULL) 
+	{
+		InfraTrace("input param error\n");
+		return false;
+	}
+
+	if(m_pInternal->qId < 0)
 	{
 		InfraTrace("Queue %s not ready\n", m_pInternal->name.c_str());
 		return false;

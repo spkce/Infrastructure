@@ -101,8 +101,31 @@ public:
 	}
 };
 
+class CThreadTest3
+{
+	Infra::CThread m_thread;
+public:
+	CThreadTest3()
+	{
+		m_thread.attachProc(Infra::ThreadProc_t(&CThreadTest3::thread_proc, this));
+		m_thread.createTread();
+	}
+	
+	void start()
+	{
+		m_thread.run();
+	}
+
+	void thread_proc(void* a)
+	{
+		printf("\033[35m""CThreadTest3 :: thread_proc""\033[0m\n");
+		sleep(1);
+	}
+};
+
 void thread_test(void)
 {
+	/*
 	int i = 10;
 	
 	CThreadTest1 b;
@@ -125,6 +148,11 @@ void thread_test(void)
 
 	CThreadTest2 test2;
 	m_cond.wait();
-	printf("thread_test retrun \n");
+	*/
+	CThreadTest3 test3;
+	sleep(5);
+	test3.start();
+	sleep(10);
+	printf("thread_test retrun\n");
 }
 

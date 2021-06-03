@@ -190,7 +190,7 @@ struct ThreadInternal
 
 void* ThreadInternal::proc(void* arg)
 {
-	bool isLoop = false;
+	bool isLoop = true;
 	bool isExit = false;
 	bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
@@ -205,7 +205,7 @@ void* ThreadInternal::proc(void* arg)
 		isExit = pInternal->bExit;
 		isSuspend = pInternal->bSuspend;
 		pInternal->mutex.unlock();
-		
+
 		if (isExit)
 		{
 			break;
@@ -217,6 +217,7 @@ void* ThreadInternal::proc(void* arg)
 			InfraTrace("thread proc wait\n");
 			pInternal->cond.signal();
 			pInternal->cond.wait();
+			InfraTrace("thread proc wait end\n");
 			pInternal->state = THREAD_EXCUTE;
 			continue;
 		}
@@ -319,6 +320,7 @@ void CThread::run(bool isLoop)
 
 	if (m_pInternal->state == THREAD_SUSPEND)
 	{
+		InfraTrace("signal\n");
 		m_pInternal->cond.signal();
 	}
 }

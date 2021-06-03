@@ -21,6 +21,7 @@ public:
 	bool setProc(const TimerProc_t & proc);
 	bool run();
 	bool stop();
+	bool isRun();
 	
 private:
 

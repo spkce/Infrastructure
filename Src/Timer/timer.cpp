@@ -351,4 +351,9 @@ bool CTimer::stop()
 	return true;
 }
 
+bool CTimer::isRun()
+{
+	return m_pInternal->status == emTimerWait || m_pInternal->status == emTimerWork;
+}
+
 } //Infra

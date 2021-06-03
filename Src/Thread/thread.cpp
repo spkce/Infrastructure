@@ -202,6 +202,7 @@ void* ThreadInternal::proc(void* arg)
 	InfraTrace("thread proc signal\n");
 	do
 	{
+		printf("#1 : %p\n", pInternal);
 		pInternal->mutex.lock();
 		isExit = pInternal->bExit;
 		isSuspend = pInternal->bSuspend;

@@ -7,7 +7,7 @@ namespace Infra
 {
 
 struct QueueInternal;
-
+// 消息队列的使用需要应用程序有一定的权限
 class CMsgQueue
 {
 public:

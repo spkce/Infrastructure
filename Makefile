@@ -25,6 +25,7 @@ TEST_DIR += \
 ./Test/Link \
 ./Test/Callback \
 ./Test/Timer \
+./Test/MsgQueue \
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out

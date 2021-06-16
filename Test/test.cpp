@@ -6,6 +6,7 @@ extern void thread_test(void);
 extern void link_test(void);
 extern void callback_test(void);
 extern void timer_test(void);
+extern void MsgQueue_test(void);
 
 int main()
 {
@@ -21,6 +22,8 @@ int main()
 	//callback_test();
 	printf("**************timer_test***************\n");
 	//timer_test();
-	
+	printf("**************MsgQueue_test***************\n");
+	//MsgQueue_test();
+
 	return 0;
 }

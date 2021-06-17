@@ -18,11 +18,6 @@ void MsgQueue_test(void)
 	memset(buf, 0, sizeof(buf));
 	queue.output(buf, sizeof(buf));
 	printf("output: %s \n", buf);
-
-	while (1)
-	{
-		/* code */
-	}
 	
 	memset(buf, 0, sizeof(buf));
 	queue.output(buf, sizeof(buf));

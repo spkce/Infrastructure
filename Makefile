@@ -3,7 +3,7 @@
 CC = g++
 AR = ar
 FILE_TYPE = .cpp
-CFLAGS = -Wall -DINFRA_LOG
+CFLAGS = -Wall -DINFRA_LOG 
 MAKE_CFLAGS = --no-print-directory
 
 ROOT_DIR = $(shell pwd)
@@ -29,7 +29,7 @@ TEST_DIR += \
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out
-LIBS = -L$(DIR_LIB) -lInfra
+LIBS = -L$(DIR_LIB) -lInfra -lpthread -lrt
 
 OBJ = $(wildcard ${DIR_OBJ}/*.o)
 TEST_SRC = $(foreach d, ${TEST_DIR}, $(wildcard ${d}/*${FILE_TYPE}))
@@ -54,7 +54,7 @@ $(OUT) : $(DIR_SRC)
 
 #编译测试代码
 $(TEST) : $(TEST_SRC) 
-	@$(CC) $^ -g -o $@ $(INC) $(LIBS) -lpthread
+	@$(CC) $^ -g -o $@ $(INC) $(LIBS) 
 
 ECHO:
 	@echo $(INC)

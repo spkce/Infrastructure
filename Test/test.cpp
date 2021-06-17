@@ -15,7 +15,7 @@ int main()
 	printf("****************Log_test***************\n");
 	//Log_test();
 	//printf("****************thread_test***************\n");
-	thread_test();
+	//thread_test();
 	//printf("****************link_test***************\n");
 	//link_test();
 	printf("**************callback_test***************\n");
@@ -23,7 +23,7 @@ int main()
 	printf("**************timer_test***************\n");
 	//timer_test();
 	printf("**************MsgQueue_test***************\n");
-	//MsgQueue_test();
+	MsgQueue_test();
 
 	return 0;
 }

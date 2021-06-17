@@ -1,9 +1,11 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 #include <string>
-
+#include <map>
+#include "thread.h"
 
 void print_backtrace();
+
 /*
 字背景颜色范围: 40--49                   字颜色: 30—39             
  40: 黑                           30: 黑                 
@@ -29,33 +31,41 @@ ANSI控制码:
   \033[nC   光标右移n行     
   \033[nD   光标左移n行
 */
+enum emFontColor
+{
+	Font_black = 30,
+	Font_red,
+	Font_green,
+	Font_yellow,
+	Font_blue,
+	Font_violet,
+	Font_darkGreen,
+	Font_white
+};
+
+enum emBackgroundColor
+{
+	background_black = 40,
+	background_red,
+	background_green,
+	background_yellow,
+	background_blue,
+	background_violet,
+	background_darkGreen,
+	background_white
+};
+
+// archetype:为按照那种风格进行校验，如printf/scanf等
+// string-index:格式化format字符串所在的位置,如void test(testA, format,...)，此时为2
+// first-to-check:第一个可变参数的位置，如void test(testA, format,...)，此时为3
+//__attribute__((format(archetype, string-index, first-to-check)))
+
 void exprintf(int fc, int bc, const char* fmt, ...) __attribute__((format(printf, 3, 4)));
+void exprintf(int fc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
 
 class CLog
 {
 public:
-	enum emFontColor
-	{
-		Font_black = 30,
-		Font_red,
-		Font_green,
-		Font_yellow,
-		Font_blue,
-		Font_violet,
-		Font_darkGreen,
-		Font_white
-	};
-	enum emBackgroundColor
-	{
-		background_black = 40,
-		background_red,
-		background_green,
-		background_yellow,
-		background_blue,
-		background_violet,
-		background_darkGreen,
-		background_white
-	};
 	enum emLogLevel
 	{
 		logLevel_0, //关闭所有打印
@@ -69,12 +79,14 @@ public:
 	{
 		type_onlyLog = 0,
 		type_fileMsg,
-		type_modMsg
+		type_modMsg,
+		type_modVer
 	};
 public:
 	CLog(int logType, std::string name, std::string ver);
 	~CLog();
 	int setLogLevel(int lv);
+	int setLogType(int type);
 	int getLogLevel();
 	int getLogType();
 	std::string getName();
@@ -103,21 +115,26 @@ private:
 	std::string m_ver;
 };
 
-
-class CGlobalLog
+class CLogManager
 {
-public:
-	static CLog* instance();
 private:
-	CGlobalLog();
-	~CGlobalLog();
+	CLogManager();
+	~CLogManager();
 public:
+	static CLogManager* instance();
+	
+	CLog* getLog(std::string name);
+private:
+	Infra::CRwlock m_rwlock;
+	std::map<std::string, CLog*> m_mapLog;
 };
 
-#define Info(fmt, ...) CGlobalLog::instance()->_info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Debug(fmt, ...) CGlobalLog::instance()->_debug(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Trace(fmt, ...) CGlobalLog::instance()->_trace(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Warning(fmt, ...) CGlobalLog::instance()->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
-#define Error(fmt, ...) CGlobalLog::instance()->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Info(name, fmt, ...) CLogManager::instance()->getLog(name)->_info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Debug(name, fmt, ...) CLogManager::instance()->getLog(name)->_debug(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Trace(name, fmt, ...) CLogManager::instance()->getLog(name)->_trace(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Warning(name, fmt, ...) CLogManager::instance()->getLog(name)->_warning(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+#define Error(name, fmt, ...) CLogManager::instance()->getLog(name)->_error(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)
+
+
 
 #endif //__LOG_H__

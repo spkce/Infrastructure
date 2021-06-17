@@ -3,13 +3,15 @@
 CC = g++
 AR = ar
 FILE_TYPE = .cpp
-CFLAGS = -Wall
+CFLAGS = -Wall -DINFRA_LOG 
 MAKE_CFLAGS = --no-print-directory
 
 ROOT_DIR = $(shell pwd)
 DIR_OBJ = ./obj
 DIR_LIB = ./lib
 INC = -I$(ROOT_DIR)/Include
+
+INC_INTERNAL = -I$(ROOT_DIR)/Src/Log
 
 #make -C xx ：路径不能使用./xx格式
 DIR_SRC += \
@@ -23,19 +25,20 @@ TEST_DIR += \
 ./Test/Link \
 ./Test/Callback \
 ./Test/Timer \
+./Test/MsgQueue \
 
 OUT = $(DIR_LIB)/libInfra.a
 TEST = test.out
-LIBS = -L$(DIR_LIB) -lInfra
+LIBS = -L$(DIR_LIB) -lInfra -lpthread -lrt
 
 OBJ = $(wildcard ${DIR_OBJ}/*.o)
 TEST_SRC = $(foreach d, ${TEST_DIR}, $(wildcard ${d}/*${FILE_TYPE}))
 
-export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC ROOT_DIR DIR_OBJ
+export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC INC_INTERNAL ROOT_DIR DIR_OBJ
 
 all: CHECKDIR $(OUT) End
 
-test: ECHO_TEST $(TEST)
+test: all ECHO_TEST $(TEST)
 
 CHECKDIR:
 	@sudo mkdir -p $(DIR_OBJ)
@@ -51,7 +54,7 @@ $(OUT) : $(DIR_SRC)
 
 #编译测试代码
 $(TEST) : $(TEST_SRC) 
-	@$(CC) $^ -g -o $@ $(INC) $(LIBS) -lpthread
+	@$(CC) $^ -g -o $@ $(INC) $(LIBS) 
 
 ECHO:
 	@echo $(INC)

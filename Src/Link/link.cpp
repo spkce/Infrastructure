@@ -1,4 +1,6 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "link.h"
 
 namespace Infra
@@ -23,6 +25,11 @@ LinkManager::~LinkManager()
 
 }
 
+struct Node* LinkManager::getNode()
+{
+	return new struct Node();
+}
+
 CLink::CLink()
 :m_manager()
 {
@@ -31,10 +38,10 @@ CLink::CLink()
 
 CLink::~CLink()
 {
-	releas();
+	release();
 }
 
-int CLink::insert(void* payload, const unsigned int pos)
+int CLink::insert(void* payload, unsigned int pos)
 {
 	if (m_manager.iNode == 0)
 	{
@@ -48,7 +55,7 @@ int CLink::insert(void* payload, const unsigned int pos)
 		return -1;
 	}
 
-	struct Node* inp = new struct Node;
+	struct Node* inp = m_manager.getNode();
 	//装载负载
 	inp->payload = payload;
 	//左侧连接
@@ -67,10 +74,10 @@ int CLink::insert(void* payload, const unsigned int pos)
 	temp->prv = inp;
 	inp->next = temp;
 
-	return m_manager.iNode++;
+	return ++m_manager.iNode;
 }
 
-int CLink::remove(void** payload, const unsigned int pos)
+int CLink::remove(void** payload, unsigned int pos)
 {
 	if (m_manager.iNode == 0)
 	{
@@ -107,12 +114,37 @@ int CLink::remove(void** payload, const unsigned int pos)
 	
 	delete temp;
 	
-	return m_manager.iNode--;
+	return --m_manager.iNode;
+}
+
+int CLink::remove(void* payload)
+{
+	if (m_manager.iNode == 0 || payload == NULL)
+	{
+		return -1;
+	}
+
+	struct Node* p = m_manager.begin;
+	for (size_t i = 0; i < m_manager.iNode; i++)
+	{
+		if (p->payload == payload)
+		{
+			
+			delete removeNode(p, &m_manager);
+			return --m_manager.iNode;
+		}
+		else
+		{
+			p = p->next;
+		}
+	}
+
+	return -1;
 }
 
 int CLink::rise(void* payload)
 {
-	struct Node* p = new struct Node;
+	struct Node* p = m_manager.getNode();
 	p->payload = payload;
 	p->prv = m_manager.end;
 	if (m_manager.end != NULL)
@@ -126,7 +158,7 @@ int CLink::rise(void* payload)
 	{
 		 m_manager.begin = m_manager.end;
 	}
-	return m_manager.iNode++;
+	return ++m_manager.iNode;
 }
 
 int CLink::reduce(void** playload)
@@ -147,7 +179,7 @@ int CLink::reduce(void** playload)
 	return m_manager.iNode--;
 }
 
-void* CLink::get(const unsigned int pos)
+void* CLink::get(unsigned int pos)
 {
 	struct Node* p = find(pos);
 	return p == NULL ? NULL : p->payload;
@@ -160,10 +192,10 @@ unsigned int CLink::linkSize() const
 
 void CLink::clear()
 {
-	releas();
+	release();
 }
 
-Node* CLink::find(const unsigned int pos)
+Node* CLink::find(unsigned int pos)
 {
 	if (pos >= m_manager.iNode)
 	{
@@ -177,7 +209,7 @@ Node* CLink::find(const unsigned int pos)
 	return p;
 }
 
-void CLink::releas()
+void CLink::release()
 {
 	struct Node* p;
 	while (m_manager.iNode)
@@ -190,6 +222,60 @@ void CLink::releas()
 	}
 	m_manager.end = NULL;
 	m_manager.begin = NULL;
+}
+
+void* CLink::operator[](unsigned int pos)
+{
+	return find(pos)->payload;
+}
+
+int CLink::find(void* payload)
+{
+	if (payload == NULL)
+	{
+		return -1;
+	}
+
+	struct Node* p = m_manager.begin;
+	for (size_t i = 0; i < m_manager.iNode; i++)
+	{
+		if (p->payload == payload)
+		{
+			return i;
+		}
+		else
+		{
+			p = p->next;
+		}
+	}
+
+	return -1;
+}
+
+struct Node* CLink::removeNode(struct Node* p, struct LinkManager * pManager) const
+{
+	//左侧断开
+	if (p->prv != NULL)
+	{
+		(p->prv)->next = p->next;
+	}
+	else
+	{
+		//要移除的是头节点
+		pManager->begin = p->next;
+	}
+	//右侧断开
+	if (p->next != NULL)
+	{
+		(p->next)->prv = p->prv;
+	}
+	else
+	{
+		//要移除的是尾节点
+		pManager->end = p->prv;
+	}
+
+	return p;
 }
 
 }//__LINK_H__

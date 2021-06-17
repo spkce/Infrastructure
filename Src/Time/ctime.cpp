@@ -1,7 +1,6 @@
 
 #include "stdio.h"
 #include "ctime.h"
-#include <time.h>
 #include <sys/select.h>
 #include <errno.h>
 
@@ -104,7 +103,7 @@ CData::~CData()
 //time_t tv_sec; /* 秒*/
 //long tv_nsec; /* 纳秒*/
 //};
-long CTime::getRealTimeSecond()
+unsigned long long CTime::getRealTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
@@ -112,54 +111,63 @@ long CTime::getRealTimeSecond()
 }
 
 
-long CTime::getRealTimeMSecond()
+unsigned long long CTime::getRealTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
-long CTime::getSystemTimeSecond()
+unsigned long long CTime::getSystemTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return time.tv_sec;
 }
 
-long CTime::getSystemTimeMSecond()
+unsigned long long CTime::getSystemTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
-long CTime::getProcessTimeSecond()
+unsigned long long CTime::getProcessTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time); 
 	return time.tv_sec;
 }
 
-long CTime::getProcessTimeMSecond()
+unsigned long long CTime::getProcessTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
-long CTime::getThreadTimeSecond()
+unsigned long long CTime::getThreadTimeSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_sec;
 }
 
-long CTime::getThreadTimeMSecond()
+unsigned long long CTime::getThreadTimeMSecond()
 {
 	timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
+
+void CTime::covertRealTime(unsigned int ms, timespec *tp)
+{
+	unsigned long long _ms = getRealTimeMSecond() + ms;
+
+	tp->tv_sec = _ms/1000;
+	tp->tv_nsec = (_ms%1000)*1000;
+}
+
 void CTime::delay_ms(unsigned int ms)
 {
 	struct timeval tv;
@@ -171,4 +179,5 @@ void CTime::delay_ms(unsigned int ms)
 		err = select(0,NULL,NULL,NULL,&tv);
 	}while (err<0 && errno==EINTR);
 }
+
 }//Infra

@@ -4,33 +4,24 @@
 namespace Infra
 {
 
-class IThread;
-struct ThreadPoolInternal;
-class CThreadPoolManager
+class CThreadCore;
+
+class CPoolThread
 {
 public:
-	static CThreadPoolManager *instance();
-
-private:
-	CThreadPoolManager();
-	~CThreadPoolManager();
-	//bool releaseThread(IThread *pthread);
-
+	typedef TFuncation1<void, void *> ThreadProc_t;
 public:
-	IThread *applyThread();
+	CPoolThread();
+	virtual ~CPoolThread();
 
-	bool cancelThread(IThread *pthread);
-
+	bool run(bool isBlock);
+	bool stop(bool isBlock);
+	bool attach(ThreadProc_t proc);
+	bool detach(ThreadProc_t proc);
 private:
-	void workProc(void *arg);
-
-private:
-	void allocThread();
-
-	void releaseThread(IThread* pThread);
-
-	struct ThreadPoolInternal* m_pInternal;
-};
+	CThreadCore* m_threadCore;
+	ThreadProc_t m_proc;
+}
 
 } //Infra
 

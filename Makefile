@@ -41,8 +41,8 @@ all: CHECKDIR $(OUT) End
 test: all ECHO_TEST $(TEST)
 
 CHECKDIR:
-	@sudo mkdir -p $(DIR_OBJ)
-	@sudo mkdir -p $(DIR_LIB)
+	@mkdir -p $(DIR_OBJ)
+	@mkdir -p $(DIR_LIB)
 
 #递归编译各个模块
 $(DIR_SRC) : ECHO

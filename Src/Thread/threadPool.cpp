@@ -68,14 +68,14 @@ CThreadCore::CThreadCore()
 
 CThreadCore::~CThreadCore()
 {
-	m_threadCore->m_rwlock.wLock();
-	m_threadCore->m_bExit = true;
-	m_threadCore->m_rwlock.unLock();
+	m_rwlock.wLock();
+	m_bExit = true;
+	m_rwlock.unLock();
 
 	m_procCond.wait();
 }
 
-int CThreadCore::getState()
+int CThreadCore::getState() const
 {
 	return m_state;
 }
@@ -87,7 +87,7 @@ void* CThreadCore::proc(void* arg)
 	CThreadCore* pCore = (CThreadCore*)arg;
 
 	InfraTrace("thread:%p proc run\n", pCore);
-	m_procCond.signal();
+	pCore->m_procCond.signal();
 	pCore->m_state = THREAD_EXCUTE;
 	InfraTrace("thread:%p proc signal\n", pCore);
 	do
@@ -117,12 +117,12 @@ void* CThreadCore::proc(void* arg)
 			continue;
 		}
 
-		if (pCore->owner != NULL)
+		if (pCore->m_owner != NULL)
 		{
-			if (pCore->owner->m_proc.isEmpty())
+			CPoolThread::ThreadProc_t & proc = ((CPoolThread*)(pCore->m_owner))->m_proc;
+			if (proc.isEmpty())
 			{
 				pCore->m_state = THREAD_WORK;
-				CPoolThread::ThreadProc_t proc = pCore->owner->m_proc;
 				proc(arg);
 				pCore->m_state = THREAD_EXCUTE;
 			}

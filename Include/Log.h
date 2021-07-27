@@ -124,6 +124,7 @@ public:
 	static CLogManager* instance();
 	
 	CLog* getLog(std::string name);
+	CLog* findLog(std::string name);
 private:
 	Infra::CRwlock m_rwlock;
 	std::map<std::string, CLog*> m_mapLog;

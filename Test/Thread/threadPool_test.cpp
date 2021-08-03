@@ -10,7 +10,8 @@ class CThreadPoolTest1
 public:
 	CThreadPoolTest1()
 	{
-		m_thread.attach(Infra::CPoolThread::ThreadProc_t(&CThreadPoolTest1::thread_proc, this));
+		bool ret = m_thread.attach(Infra::CPoolThread::ThreadProc_t(&CThreadPoolTest1::thread_proc, this));
+		printf("\033[35m""attach : %s""\033[0m\n", ret ? "true" : "false");
 	}
 	~CThreadPoolTest1()
 	{
@@ -18,7 +19,11 @@ public:
 	}
 	void start()
 	{
-		m_thread.run(true);
+		m_thread.run();
+	}
+	void stop(bool isBlock)
+	{
+		m_thread.stop(isBlock);
 	}
 	void thread_proc(void* a)
 	{
@@ -31,11 +36,15 @@ public:
 
 void threadPool_test(void)
 {
-	CThreadPoolTest1 test1;
+	{
+		CThreadPoolTest1 test1;
 
-	test1.start();
-
-
+		printf("\033[35m""test1 run ""\033[0m\n");
+		test1.start();
+		sleep(10);
+		printf("\033[35m""test1 stop ""\033[0m\n");
+		test1.stop(true);
+	}
 	sleep(30);
 
 }

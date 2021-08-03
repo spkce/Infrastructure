@@ -17,7 +17,7 @@ public:
 	CPoolThread();
 	virtual ~CPoolThread();
 
-	bool run(bool isBlock);
+	bool run();
 	bool stop(bool isBlock);
 	bool attach(const ThreadProc_t & proc);
 	bool detach(const ThreadProc_t & proc);

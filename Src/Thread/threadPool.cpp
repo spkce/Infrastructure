@@ -4,6 +4,7 @@
 #include "threadPool.h"
 #include "link.h"
 #include "LogInternal.h"
+#include "ctime.h"
 
 namespace Infra
 {
@@ -62,17 +63,22 @@ CThreadCore::CThreadCore()
 {
 	if (init())
 	{
+		//等待CThreadCore::proc开始执行
 		m_procCond.wait();
 	}
 }
 
 CThreadCore::~CThreadCore()
 {
-	m_rwlock.wLock();
-	m_bExit = true;
-	m_rwlock.unLock();
+	if (m_handle)
+	{
+		m_rwlock.wLock();
+		m_bExit = true;
+		m_rwlock.unLock();
+		m_spndCond.signal();
 
-	m_procCond.wait();
+		m_procCond.wait();
+	}
 }
 
 int CThreadCore::getState() const
@@ -86,10 +92,12 @@ void* CThreadCore::proc(void* arg)
 	bool isSuspend = false;
 	CThreadCore* pCore = (CThreadCore*)arg;
 
-	InfraTrace("thread:%p proc run\n", pCore);
 	pCore->m_procCond.signal();
+	InfraTrace("thread:%p ready\n", pCore);
+	pCore->m_state = THREAD_SUSPEND; //默认初始状态为挂起
+	pCore->m_spndCond.wait();
 	pCore->m_state = THREAD_EXCUTE;
-	InfraTrace("thread:%p proc signal\n", pCore);
+	InfraTrace("thread:%p start\n", pCore);
 	do
 	{
 		pCore->m_rwlock.rLock();
@@ -108,8 +116,9 @@ void* CThreadCore::proc(void* arg)
 			pCore->m_rwlock.wLock();
 			pCore->m_bSuspend = false;
 			pCore->m_rwlock.unLock();
-			InfraTrace("thread:%p proc suspend\n", pCore);
+			InfraTrace("thread:%p proc signal\n", pCore);
 			pCore->m_spndCond.signal();
+			InfraTrace("thread:%p proc suspend\n", pCore);
 			pCore->m_spndCond.wait();
 			InfraTrace("thread:%p proc suspend end\n", pCore);
 			pCore->m_state = THREAD_EXCUTE;
@@ -119,13 +128,20 @@ void* CThreadCore::proc(void* arg)
 
 		if (pCore->m_owner != NULL)
 		{
+			pCore->m_state = THREAD_WORK;
 			CPoolThread::ThreadProc_t & proc = ((CPoolThread*)(pCore->m_owner))->m_proc;
-			if (proc.isEmpty())
+			if (!proc.isEmpty())
 			{
-				pCore->m_state = THREAD_WORK;
 				proc(arg);
-				pCore->m_state = THREAD_EXCUTE;
 			}
+			else
+			{
+				pCore->m_rwlock.wLock();
+				pCore->m_bSuspend = true;
+				pCore->m_rwlock.unLock();
+				continue;
+			}
+			pCore->m_state = THREAD_EXCUTE;
 		}
 		else
 		{
@@ -173,7 +189,7 @@ private:
 	~CThreadPoolManager();
 
 public:
-	CThreadCore *applyCore();
+	CThreadCore *applyCore(void* owner);
 	void cancelCore(CThreadCore *core);
 
 private:
@@ -207,7 +223,7 @@ CThreadPoolManager::~CThreadPoolManager()
 
 }
 
-CThreadCore * CThreadPoolManager::applyCore()
+CThreadCore * CThreadPoolManager::applyCore(void* owner)
 {
 	if (m_listIdle.linkSize() == 0)
 	{
@@ -217,7 +233,7 @@ CThreadCore * CThreadPoolManager::applyCore()
 	CThreadCore* p = NULL;
 	CGuard<CMutex> guard(m_mutex);
 	m_listIdle.reduce((void**)&p);
-
+	p->m_owner = owner;
 	return p;
 }
 
@@ -229,6 +245,7 @@ void CThreadPoolManager::cancelCore(CThreadCore *p)
 	}
 
 	CGuard<CMutex> guard(m_mutex);
+	p->m_owner = NULL;
 	m_listIdle.rise(p);
 }
 
@@ -241,7 +258,7 @@ void CThreadPoolManager::alloc()
 
 CPoolThread::CPoolThread()
 {
-	m_threadCore = CThreadPoolManager::instance()->applyCore();
+	m_threadCore = CThreadPoolManager::instance()->applyCore((void*)this);
 }
 
 CPoolThread::~CPoolThread()
@@ -250,7 +267,7 @@ CPoolThread::~CPoolThread()
 	CThreadPoolManager::instance()->cancelCore(m_threadCore);
 }
 
-bool CPoolThread::run(bool isBlock)
+bool CPoolThread::run()
 {
 	if (m_proc.isEmpty())
 	{
@@ -258,25 +275,41 @@ bool CPoolThread::run(bool isBlock)
 		return false;
 	}
 
-	if (m_threadCore->getState() == CThreadCore::THREAD_SUSPEND)
+	if (m_threadCore->getState() == CThreadCore::THREAD_EXIT)
 	{
-		m_threadCore->m_spndCond.signal();
-		
-		return true;
+		return false;
 	}
 
-	return false;
+	m_threadCore->m_rwlock.wLock();
+	m_threadCore->m_bSuspend = false;
+	m_threadCore->m_rwlock.unLock();
+
+	
+	if (m_threadCore->getState() == CThreadCore::THREAD_INIT)
+	{
+		//若m_threadCore刚创建还没有就绪，等待300ms
+		CTime::delay_ms(100);
+		if (m_threadCore->getState() == CThreadCore::THREAD_INIT)
+		{
+			return false;
+		}
+	}
+
+	m_threadCore->m_spndCond.signal();
+	return true;
 }
 
 
 bool CPoolThread::stop(bool isBlock)
 {
-	if (m_threadCore->getState() == CThreadCore::THREAD_EXCUTE 
-		|| m_threadCore->getState() == CThreadCore::THREAD_WORK)
+	const int status = m_threadCore->getState();
+	if (status == CThreadCore::THREAD_EXCUTE 
+		|| status == CThreadCore::THREAD_WORK)
 	{
 		m_threadCore->m_rwlock.wLock();
 		m_threadCore->m_bSuspend = true;
 		m_threadCore->m_rwlock.unLock();
+
 		if (isBlock)
 		{
 			m_threadCore->m_spndCond.wait();
@@ -289,20 +322,35 @@ bool CPoolThread::stop(bool isBlock)
 
 bool CPoolThread::attach(const ThreadProc_t & proc)
 {
-	if (m_threadCore->getState() == CThreadCore::THREAD_SUSPEND
-		|| m_threadCore->getState() == CThreadCore::THREAD_EXCUTE)
+	const int status = m_threadCore->getState();
+	InfraTrace("thread status : %d \n", status);
+	if (status == CThreadCore::THREAD_EXCUTE 
+		|| status == CThreadCore::THREAD_WORK
+		|| status == CThreadCore::THREAD_EXIT)
+	{
+		return false;
+	}
+
+	if (m_proc.isEmpty())
 	{
 		m_proc = proc;
 		return true;
 	}
+
 	return false;
 }
 
 bool CPoolThread::detach(const ThreadProc_t & proc)
 {
-	if (m_threadCore->getState() == CThreadCore::THREAD_SUSPEND)
+	const int status = m_threadCore->getState();
+	InfraTrace("thread status : %d \n", status);
+	if (status == CThreadCore::THREAD_SUSPEND)
 	{
-		m_proc.isEmpty();
+		if (!m_proc.isEmpty())
+		{
+			m_proc.unbind();
+			return true;
+		}
 	}
 	return false;
 }

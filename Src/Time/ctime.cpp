@@ -172,7 +172,7 @@ void CTime::delay_ms(unsigned int ms)
 {
 	struct timeval tv;
 	tv.tv_sec = 0;
-	tv.tv_usec = ms;
+	tv.tv_usec = ms*1000;
 	int err;
 	do
 	{

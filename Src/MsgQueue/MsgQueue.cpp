@@ -63,6 +63,7 @@ CMsgQueue::CMsgQueue(int maxMsg, int maxMsgLen)
 CMsgQueue::~CMsgQueue()
 {
 	mq_close(m_pInternal->qId);
+	mq_unlink(m_pInternal->name.c_str());
 	delete m_pInternal;
 }
 

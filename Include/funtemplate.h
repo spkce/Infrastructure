@@ -122,6 +122,7 @@ public:
 		{
 			return m_func.funcPtr(PARAM_INPUT);
 		}
+		return R(0);
 	}
 	inline bool isEmpty() const
 	{

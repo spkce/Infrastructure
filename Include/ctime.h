@@ -4,42 +4,60 @@
 #include <time.h>
 namespace Infra
 {
-//长日期格式
-enum
-{
-	YYYY_MM_DD,
-	DD_MM_YYYY,
-};
 
-//时间格式
-enum
+typedef struct tagDate
 {
-	HH_MM_SS,
-	HH_MM_SS_APM,
-};
+	tagDate() {}
+	tagDate(unsigned int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second)
+	{
+		this->year = year;
+		this->month = month;
+		this->day = day;
+		this->hour = hour;
+		this->minute = minute;
+		this->second = second;
+	}
+	unsigned int year; //[1970,2038]
+	unsigned int month; //[1,12]
+	unsigned int day; //[1, 31]
+	unsigned int hour; //[0, 23]
+	unsigned int minute;//[0, 23]
+	unsigned int second;//[0, 23]
+}TDate, *PTDate;
 
-class CData
+class CDate
 {
 public:
-	CData();
-	CData(long long timeStamp);
-	CData(CData &data);
-	virtual ~CData();
+	CDate();
+	CDate(time_t timeStamp);
+	CDate(CDate &data);
+	CDate(PTDate p);
+	CDate(const TDate & tDate);
+	virtual ~CDate();
+
+	static time_t convertDate(PTDate p);
+	static time_t convertDate(const TDate & tDate);
+public:
+
+	CDate& operator=(const CDate& o);
+	bool operator==(const CDate& o);
+	bool operator>(const CDate& o);
+	bool operator<(const CDate& o);
+
+	const char* str();
+	time_t get();
+	bool get(PTDate p);
+	bool get(TDate & t);
 private:
-	unsigned int m_year;
-	unsigned int m_month;
-	unsigned int m_day;
-	unsigned int m_hour;
-	unsigned int m_minute;
-	unsigned int m_second;
-	long long m_timeStamp;
+
+	time_t m_timeStamp;
 };
 
 class CTime
 {
 public:
 	CTime();
-	CTime(CData &t);
+	CTime(CDate &t);
 	virtual ~CTime();
 	//获取当前unix时间戳, 单位:秒
 	static unsigned long long getRealTimeSecond();

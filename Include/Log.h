@@ -31,6 +31,9 @@ ANSI控制码:
   \033[nC   光标右移n行     
   \033[nD   光标左移n行
 */
+/*
+eg: printf("\033[0;35m""aaaaaaaaaaaaaaaaa""\033[0m\n"); //紫色，透明背景
+*/
 enum emFontColor
 {
 	Font_black = 30,

@@ -10,7 +10,7 @@ namespace Infra
 
 CDate::CDate()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
 	m_timeStamp = time.tv_sec;
 }
@@ -171,7 +171,7 @@ bool CDate::get(TDate & t)
 //};
 unsigned long long CTime::getRealTimeSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
 	return time.tv_sec;
 }
@@ -179,49 +179,49 @@ unsigned long long CTime::getRealTimeSecond()
 
 unsigned long long CTime::getRealTimeMSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_REALTIME, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
 unsigned long long CTime::getSystemTimeSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return time.tv_sec;
 }
 
 unsigned long long CTime::getSystemTimeMSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_MONOTONIC, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
 unsigned long long CTime::getProcessTimeSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time); 
 	return time.tv_sec;
 }
 
 unsigned long long CTime::getProcessTimeMSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }
 
 unsigned long long CTime::getThreadTimeSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_sec;
 }
 
 unsigned long long CTime::getThreadTimeMSecond()
 {
-	timespec time;
+	struct timespec time;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &time);
 	return time.tv_nsec /1000000 + time.tv_sec* 1000;
 }

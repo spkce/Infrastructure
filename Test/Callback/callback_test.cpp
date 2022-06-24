@@ -1,97 +1,66 @@
 #include "stdio.h"
 #include "callback.h"
-
-#include "TFuncation.h"
+#include "cfunc.h"
 
 class CTest
 {
+    Infra::CFunc<void> m_sig0;
+    Infra::CFunc<int, int, char> m_sig1;
+    Infra::CFunc<int, int&&, int&> m_sig2;
+    Infra::CFunc<void, int, int> m_sig3;
+    void callback0()
+    {
+        printf("callback0\n");
+    }
+    int callback1(int a, char b)
+    {
+        printf("callback1 a:%d b:%d\n", a, (int)b);
+        return a+(int)b;
+    }
+    int callback2(int && a, int &b)
+    {
+        printf("callback2 a:%d b:%d\n", a, --b);
+        return a+b;
+    }
+    static void callback3(int a, int b)
+    {
+        printf("callback3 a:%d b:%d\n", a, b);
+    }
 public:
-	CTest():m_sig()
-	{
-		m_test = 0;
-		m_sig.attach(this, &CTest::onCallback);
-	}
-	~CTest(){}
-public: 
-	void onCallback(int a, int b)
-	{
-		printf("CTest::onCallback(%d,%d)\n",a,b);
-		m_test = a;
-		printf("m_test = %d \n", m_test);
-	}
-	void dump()
-	{
-		printf("CTest::dump()\n");
-		m_sig(1,1);
-	}
-	Infra::CCallback<CTest, int, int> m_sig;
-	int m_test;
+    CTest(/* args */)
+    {
+        m_sig0.bind(&CTest::callback0, this);
+        m_sig1.bind(&CTest::callback1, this);
+        m_sig2.bind(&CTest::callback2, this);
+        m_sig3.bind(&CTest::callback3);
+    }
+    
+    ~CTest()
+    {
+        m_sig0.unbind();
+        m_sig1.unbind();
+        m_sig2.unbind();
+        m_sig3.unbind();
+    }
+
+    void dump()
+    {
+        m_sig0();
+       int ret1 = m_sig1(10,'1');
+       printf("m_sig1 ret:%d\n", ret1);
+       
+       int a = 10;
+       int b = 11;
+       int ret2 = m_sig2(std::move(a), b);
+       printf("m_sig2 ret:%d b:%d\n", ret2, b);
+       m_sig3(10,11);
+    }
 };
 
-class CTest2
-{
-public:
-	CTest2():m_sig(23)
-	{
-		m_test = 0;
-		m_sig.attach(this, &CTest2::onCallback0);
-		m_sig.attach(this, &CTest2::onCallback1);
-		m_sig.attach(this, &CTest2::onCallback2);
-	}
-	~CTest2(){}
-public: 
-	void onCallback0(int a, int b)
-	{
-		printf("CTest2::onCallback0(%d,%d)\n",a,b);
-		m_test = a;
-		printf("m_test = %d \n", m_test);
-	}
-	void onCallback1(int a, int b)
-	{
-		printf("CTest2::onCallback1(%d,%d)\n",a,b);
-		m_test = a;
-		printf("m_test = %d \n", m_test);
-	}
-	void onCallback2(int a, int b)
-	{
-		printf("CTest2::onCallback2(%d,%d)\n",a,b);
-		m_test = a;
-		printf("m_test = %d \n", m_test);
-	}
-	void dump()
-	{
-		printf("CTest2::dump()\n");
-		m_sig(1,1);
-	}
-	Infra::CObserver<CTest2, int, int> m_sig;
-	int m_test;
-};
-
-class CTFunctionTest
-{
-public:
-	void fun(int a, int b);
-	void dump()
-	{
-		//TFuncation1<void, int, int> ss(&CTFunctionTest::fun, this);
-
-		//ss
-	}
-};
 
 void callback_test(void)
 {
-	{
-		CTest test;
-		test.dump();
-	}
-	{
-		CTest2 test;
-		test.dump();
-	}
-	{
-		CTFunctionTest test;
-
-		test.dump();
-	}
+	printf("**************callback_test***************\n");
+	CTest test;
+	test.dump();
 }

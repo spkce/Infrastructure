@@ -35,6 +35,7 @@
 			"xstddef": "cpp",
 			"xtr1common": "cpp",
 			"xstring": "cpp"
-		}
+		},
+		"editor.renderWhitespace": "all"
 	}
 }

@@ -1,8 +1,6 @@
 
 #include <unistd.h>
 #include <string.h>
-
-//#include "singlenton.h"
 #include "link.h"
 #include "ctime.h"
 #include "timer.h"

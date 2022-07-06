@@ -278,4 +278,4 @@ struct Node* CLink::removeNode(struct Node* p, struct LinkManager * pManager) co
 	return p;
 }
 
-}//__LINK_H__
+}//Infra

@@ -1,7 +1,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#include "TFuncation.h"
+#include "cfunc.h"
 
 namespace Infra
 {
@@ -11,7 +11,7 @@ struct TimerInternal;
 class CTimer
 {
 public:
-	typedef TFuncation1<void, unsigned long long> TimerProc_t;
+	typedef CFunc<void, unsigned long long> TimerProc_t;
 public:
 	CTimer();
 	CTimer(const char* name);

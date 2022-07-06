@@ -1,6 +1,6 @@
 #ifndef __THREAD_H__
 #define __THREAD_H__
-#include "TFuncation.h"
+#include "cfunc.h"
 
 namespace Infra
 {
@@ -115,7 +115,7 @@ private:
 	struct RwlockInternal* m_pInternal;
 };
 
-typedef TFuncation1<void, void *> ThreadProc_t;
+typedef CFunc<void, void*> ThreadProc_t;
 /**
 * @brief 线程基类
 **/

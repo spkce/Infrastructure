@@ -2,12 +2,17 @@
 #include "callback.h"
 #include "cfunc.h"
 
+void callback4(void* p)
+{
+    printf("callback4 a:%p\n", p);
+}
 class CTest
 {
     Infra::CFunc<void> m_sig0;
     Infra::CFunc<int, int, char> m_sig1;
     Infra::CFunc<int, int&&, int&> m_sig2;
     Infra::CFunc<void, int, int> m_sig3;
+    Infra::CFunc<void, void*> m_sig4;
     void callback0()
     {
         printf("callback0\n");
@@ -26,6 +31,8 @@ class CTest
     {
         printf("callback3 a:%d b:%d\n", a, b);
     }
+    
+
 public:
     CTest(/* args */)
     {
@@ -33,6 +40,7 @@ public:
         m_sig1.bind(&CTest::callback1, this);
         m_sig2.bind(&CTest::callback2, this);
         m_sig3.bind(&CTest::callback3);
+        m_sig4.bind(callback4);
     }
     
     ~CTest()
@@ -54,6 +62,9 @@ public:
        int ret2 = m_sig2(std::move(a), b);
        printf("m_sig2 ret:%d b:%d\n", ret2, b);
        m_sig3(10,11);
+
+       void* p = &a;
+       m_sig4(p);
     }
 };
 

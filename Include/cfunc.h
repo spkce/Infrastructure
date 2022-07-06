@@ -113,16 +113,16 @@ public:
 
 		return false;
 	}
-
-	inline R operator()(Args &&...args)
+	template <typename ...Args_>
+	inline R operator()(Args_ &&...args)
 	{
 		if (m_type == typeMember)
 		{
-			return (m_func.memFunc.obj->*m_func.memFunc.proc)(std::forward<Args>(args)...);
+			return (m_func.memFunc.obj->*m_func.memFunc.proc)(std::forward<Args_>(args)...);
 		}
 		else if (m_type == typePointer)
 		{
-			return m_func.funcPtr(std::forward<Args>(args)...);
+			return m_func.funcPtr(std::forward<Args_>(args)...);
 		}
 		return R(0);
 	}

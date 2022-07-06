@@ -9,6 +9,9 @@ namespace Infra
 #define MACRO_DO_JOIN(X, Y) MACRO_DO_JOIN2(X, Y)
 #define MACRO_DO_JOIN2(X, Y) X##Y
 
+//filename usd to __FILE__
+#define filename(x) strrchr(x, '/') ? strrchr(x, '/') + 1 : x
+
 //horrible_cast
 template<class OutputClass, class InputClass>
 union horrible_union
@@ -29,6 +32,7 @@ inline OutputClass horrible_cast(const InputClass input)
 	u.in = input;
 	return u.out;
 }
+
 
 }//Infra
 

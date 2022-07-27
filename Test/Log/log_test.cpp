@@ -1,5 +1,7 @@
 #include "Log.h"
 #include "stdio.h"
+
+using namespace Infra;
 void Log_test(void)
 {
 	print_backtrace();
@@ -11,14 +13,15 @@ void Log_test(void)
 	Error("logTest", "#5 %s %d\n", "&", 5);
 	
 	CLog* pLog = CLogManager::instance()->getLog("logTest");
-	pLog->setLogLevel(CLog::logLevel_0);
+	pLog->setLevel(CLog::logLevel_0);
 	Info("logTest","#1 %s %d\n", "&", 1);
 	Debug("logTest","#2 %s %d\n", "&", 2);
 	Trace("logTest", "#3 %s %d\n", "&", 3);
 	Warning("logTest", "#4 %s %d\n", "&", 4);
 	Error("logTest", "#5 %s %d\n", "&", 5);
 	
-	CLog inst(CLog::type_fileMsg, std::string(""), std::string(""));
+	CLog inst(std::string(""), std::string(""), CLog::type_fileMsg);
+	inst.setColor(true);
 	inst.info("#1 CLog %s %d\n", "&", 1);
 	inst.debug("#2 CLog %s %d\n", "&", 2);
 	inst.trace("#3 CLog %s %d\n", "&", 3);

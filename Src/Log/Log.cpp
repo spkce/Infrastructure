@@ -4,6 +4,9 @@
 #include "Log.h"
 #include <stdarg.h>
 
+namespace Infra
+{
+
 void print_backtrace()
 {
 	void * arry[10] = {0};
@@ -18,27 +21,27 @@ void print_backtrace()
 
 inline void printlog(int fc, const char* buf, va_list args)
 {
-	fprintf(stdout,"\033[%dm", fc);
+	if(fc) fprintf(stdout,"\033[%dm", fc);
 	vfprintf(stdout, buf, args);
-	fprintf(stdout,"\033[0m");
+	if(fc) fprintf(stdout,"\033[0m");
 }
 
 #define print(lv, name, ver, fc, file, line, func, fmt)							\
 do{																					\
-	if (m_printLogLevel < (lv)) break;												\
+	if (m_level < (lv)) break;												\
 	char buffer[8192];																\
 	buffer[8191] = 0;																\
 	int n = 0;																		\
-	switch(m_logType)																							\
+	switch(m_type)																							\
 	{																											\
 		case type_fileMsg:																						\
-			n = snprintf(buffer, sizeof(buffer) - 1, "%s:%d %s ", (file), (line), (func));						\
+			n = snprintf(buffer, sizeof(buffer) - 1, "%s:%d %s ", filename(file), (line), (func));						\
 			break;																								\
 		case type_modMsg:																						\
-			n = snprintf(buffer, sizeof(buffer) - 1, "[%s] %s:%d %s ", (name), (file), (line), (func));			\
+			n = snprintf(buffer, sizeof(buffer) - 1, "[%s] %s:%d %s ", (name), filename(file), (line), (func));			\
 			break;																								\
 		case type_modVer:																						\
-			n = snprintf(buffer, sizeof(buffer) - 1, "[%s-%s] %s:%d %s ", (name), (ver), (file), (line), (func));\
+			n = snprintf(buffer, sizeof(buffer) - 1, "[%s-%s] %s:%d %s ", (name), filename(ver), (file), (line), (func));\
 			break;																								\
 		case type_onlyLog:																						\
 		default:																								\
@@ -59,7 +62,6 @@ void exprintf(int fc, int bc, const char* fmt, ...)
 	vfprintf(stdout, fmt, args);
 	fprintf(stdout,"\033[0m");
 	va_end(args);
-
 }
 
 void exprintf(int fc, const char* fmt, ...)
@@ -70,14 +72,14 @@ void exprintf(int fc, const char* fmt, ...)
 	vfprintf(stdout, fmt, args);
 	fprintf(stdout,"\033[0m");
 	va_end(args);
-
 }
 
-CLog::CLog(int logType, std::string name, std::string ver)
-:m_logType(logType)
-,m_printLogLevel(logLevel_5)
+CLog::CLog(std::string name, std::string ver, int type)
+:m_type(type)
+,m_level(logLevel_5)
 ,m_name(name)
 ,m_ver(ver)
+,m_isColorOn(false)
 {
 
 }
@@ -86,28 +88,39 @@ CLog::~CLog()
 {
 
 }
-int CLog::setLogLevel(int lv)
+
+int CLog::setLevel(int lv)
 {
-	int ret = m_printLogLevel;
-	m_printLogLevel = lv;
+	int ret = m_level;
+	m_level = lv;
 	return ret;
 }
 
-int CLog::setLogType(int type)
+int CLog::setType(int type)
 {
-	int ret = m_logType;
-	m_logType = type;
+	int ret = m_type;
+	m_type = type;
 	return ret;
 }
 
-int CLog::getLogLevel()
+void CLog::setColor(bool isOn)
 {
-	return m_printLogLevel;
+	m_isColorOn = isOn;
 }
 
-int CLog::getLogType()
+int CLog::getLevel() const
 {
-	return m_logType;
+	return m_level;
+}
+
+int CLog::getType() const
+{
+	return m_type;
+}
+
+bool CLog::isColorOn() const
+{
+	return m_isColorOn;
 }
 
 std::string CLog::getName()
@@ -122,27 +135,27 @@ std::string CLog::getVer()
 
 void CLog::_info(const char* file, int line, const char* func, const char* fmt, ...)
 {
-	print(logLevel_5, m_name.c_str(), m_ver.c_str(), Font_white, file, line, func, fmt);
+	print(logLevel_5, m_name.c_str(), m_ver.c_str(), m_isColorOn ? Font_white : 0, file, line, func, fmt);
 }
 
 void CLog::_debug(const char* file, int line, const char* func, const char* fmt, ...)
 {
-	print(logLevel_4, m_name.c_str(), m_ver.c_str(), Font_green, file, line, func, fmt);
+	print(logLevel_4, m_name.c_str(), m_ver.c_str(), m_isColorOn ? Font_green : 0, file, line, func, fmt);
 }
 
 void CLog::_trace(const char* file, int line, const char* func, const char* fmt, ...)
 {
-	print(logLevel_3, m_name.c_str(), m_ver.c_str(), Font_violet, file, line, func, fmt);
+	print(logLevel_3, m_name.c_str(), m_ver.c_str(), m_isColorOn ? Font_violet : 0, file, line, func, fmt);
 }
 
 void CLog::_warning(const char* file, int line, const char* func, const char* fmt, ...)
 {
-	print(logLevel_2, m_name.c_str(), m_ver.c_str(), Font_yellow, file, line, func, fmt);
+	print(logLevel_2, m_name.c_str(), m_ver.c_str(), m_isColorOn ? Font_yellow : 0, file, line, func, fmt);
 }
 
 void CLog::_error(const char* file, int line, const char* func, const char* fmt, ...)
 {
-	print(logLevel_1, m_name.c_str(), m_ver.c_str(), Font_red, file, line, func, fmt);
+	print(logLevel_1, m_name.c_str(), m_ver.c_str(), m_isColorOn ? Font_red : 0, file, line, func, fmt);
 }
 
 
@@ -179,7 +192,7 @@ CLog* CLogManager::getLog(std::string name)
 	if (iter == m_mapLog.end())
 	{
 		m_rwlock.wLock();
-		CLog* p = new CLog(CLog::type_fileMsg, name, std::string(""));
+		CLog* p = new CLog(name, std::string(""), CLog::type_fileMsg);
 		m_mapLog.insert(std::pair<std::string, CLog*>(name, p));
 		m_rwlock.unLock();
 		return p;
@@ -204,3 +217,4 @@ CLog* CLogManager::findLog(std::string name)
 	return iter->second;
 }
 //void ex_info(const char* file, int line, const char* func, const char* fmt, ...)
+}//Infra

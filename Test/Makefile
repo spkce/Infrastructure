@@ -1,16 +1,14 @@
+
+
 OBJS_PATH ?= ./obj
-LIBS ?= -L/mnt/d/source/Infrastructure/lib -lInfra -lpthread -lrt
+LIBS ?= -L/mnt/d/source/Infrastructure/lib -lpthread -lrt
 INC ?= -I /mnt/d/source/Infrastructure/Include
 OUT_PATH ?= .
-OUT ?= libInfra.a
+OUT ?= test.out
 CC ?= gcc
 CXX ?= g++
 AR ?= ar
-CFLAGS ?=
 
-INC_INTERNAL = -I/mnt/d/source/Infrastructure/Src/Log
-
-INC += $(INC_INTERNAL)
 TARGET := $(OUT_PATH)/$(OUT)
 
 SRC_DIR := $(shell ls -l | grep ^d | awk '{if($$9 != "obj") print $$9}')
@@ -22,6 +20,7 @@ CPPOBJS := $(addprefix $(OBJS_PATH)/, $(CPP_OBJS))
 C_SRCS := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.c))
 C_OBJS := $(patsubst %.c, %.o, $(C_SRCS))
 COBJS := $(addprefix $(OBJS_PATH)/, $(C_OBJS))
+
 
 all: ECHO $(TARGET)
 
@@ -38,7 +37,10 @@ $(CPPOBJS) : $(OBJS_PATH)/%.o: %.cpp
 	@$(CXX) -o $@ -c $< $(CFLAGS) $(INC)
 
 $(TARGET) : $(COBJS) $(CPPOBJS)
-	@$(AR) rcs $@ $^
+	@$(CXX)  $(COBJS) $(CPPOBJS) -g -o $@ $(INC) $(LIBS) 
+
+clean:
+	@rm -rf ${OBJS_PATH}
 
 ECHO:
 	@echo "*************************************"
@@ -58,5 +60,4 @@ ECHO:
 	@echo "C_SRCS="$(C_SRCS)
 	@echo "C_OBJS="$(C_OBJS)
 	@echo "COBJS="$(COBJS)
-	@echo "CFLAGS="$(CFLAGS)
 	@echo "*************************************"

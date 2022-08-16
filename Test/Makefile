@@ -1,15 +1,13 @@
 
 
-OBJS_PATH ?= ./obj
-LIBS ?= -L/mnt/d/source/Infrastructure/lib -lpthread -lrt
-INC ?= -I /mnt/d/source/Infrastructure/Include
-OUT_PATH ?= .
-OUT ?= test.out
+OBJS_PATH ?= ../obj/test
+LIBS ?= -L ../lib -lpthread -lrt -lInfra
+INC ?= -I ../Include
 CC ?= gcc
 CXX ?= g++
 AR ?= ar
 
-TARGET := $(OUT_PATH)/$(OUT)
+TARGET ?= test.out
 
 SRC_DIR := $(shell ls -l | grep ^d | awk '{if($$9 != "obj") print $$9}')
 SRC_DIR += ./
@@ -21,33 +19,29 @@ C_SRCS := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.c))
 C_OBJS := $(patsubst %.c, %.o, $(C_SRCS))
 COBJS := $(addprefix $(OBJS_PATH)/, $(C_OBJS))
 
+export CC CXX AR CFLAGS MAKE_CFLAGS
+
+.PHONY: all ECHO
 
 all: ECHO $(TARGET)
 
 $(COBJS) : $(OBJS_PATH)/%.o: %.c
 	@echo "CC $(notdir $@)"
 	@mkdir -p $(dir $(@))
-	echo "OBJS_PATH="$(OBJS_PATH)
 	@$(CC) -o $@ -c $< $(CFLAGS) $(INC)
 	
 $(CPPOBJS) : $(OBJS_PATH)/%.o: %.cpp
 	@echo "CXX $(notdir $@)"
 	@mkdir -p $(dir $(@))
-	echo "OBJS_PATH="$(OBJS_PATH)
 	@$(CXX) -o $@ -c $< $(CFLAGS) $(INC)
 
 $(TARGET) : $(COBJS) $(CPPOBJS)
-	@$(CXX)  $(COBJS) $(CPPOBJS) -g -o $@ $(INC) $(LIBS) 
-
-clean:
-	@rm -rf ${OBJS_PATH}
+	@$(CXX)  $(COBJS) $(CPPOBJS) -lrt -lInfra -g -o $@ $(INC) $(LIBS)
 
 ECHO:
 	@echo "*************************************"
 	@echo "TARGET="$(TARGET)
 	@echo "OBJS_PATH="$(OBJS_PATH)
-	@echo "OUT_PATH="$(OUT_PATH)
-	@echo "OUT="$(OUT)
 	@echo "LIBS="$(LIBS)
 	@echo "CC="$(CC)
 	@echo "CXX="$(CXX)

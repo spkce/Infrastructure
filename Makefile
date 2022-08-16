@@ -1,50 +1,41 @@
 
 ROOT_DIR = $(shell pwd)
-DIR_OBJ = ./obj
-DIR_LIB = ./lib
-INC = -I$(ROOT_DIR)/Include
+DIR_OBJ ?= $(ROOT_DIR)/obj
+DIR_LIB ?= $(ROOT_DIR)/lib
+TARGET = $(DIR_LIB)/libInfra.a
+TEST = $(ROOT_DIR)/test.out
 
-OBJS_PATH ?= ./obj
-LIBS ?= -L/mnt/d/source/Infrastructure/lib -lpthread -lrt
-INC ?= -I /mnt/d/source/Infrastructure/Include
-OUT_PATH ?= .
-OUT ?= test.out
+INC ?= -I$(ROOT_DIR)/Include
+LIBS ?= -lpthread -lrt
 CC ?= gcc
 CXX ?= g++
 AR ?= ar
-CFLAGS ?= -Wall --no-print-directory #-DINFRA_LOG
+CFLAGS ?= -Wall -DINFRA_LOG
+MAKE_CFLAGS ?= --no-print-directory
 
-ROOT_DIR = $(shell pwd)
-DIR_OBJ = ./obj
-DIR_LIB = ./lib
-INC = -I$(ROOT_DIR)/Include
+export CC CXX AR CFLAGS MAKE_CFLAGS
 
-#make -C xx ：路径不能使用./xx格式
-#DIR_SRC += \
-#Src
+.PHONY: all checkdir target test clean 
 
+all: checkdir target
 
-#export CC FILE_TYPE CFLAGS MAKE_CFLAGS INC INC_INTERNAL ROOT_DIR DIR_OBJ
+test: all
 
-all: CHECKDIR target
-
-test: all ECHO_TEST
-
-CHECKDIR:
+checkdir:
 	@mkdir -p $(DIR_OBJ)
 	@mkdir -p $(DIR_LIB)
 
 #生成静态库libInfra.a
 target:
-	@make "CFLAGS="$(CFLAGS) -C Src
+	@make $(MAKE_CFLAGS) OBJS_PATH="$(DIR_OBJ)" TARGET="$(TARGET)" LIBS="$(LIBS)" INC="$(INC)" -C Src
 
-#编译测试代码
+#编译测试代码 # LIBS="-L$(DIR_LIB) $(LIBS) -lInfra"
 test:
-	@make "CFLAGS="$(CFLAGS) -C Test
+	@make $(MFLAGS) OBJS_PATH="$(DIR_OBJ)/test" TARGET"=$(TEST)" -C Test
 
 clean:
-	@rm -rf ${DIR_OBJ}
-	@rm -rf ${DIR_LIB}
+	@rm -rf $(DIR_OBJ)
+	@rm -rf $(DIR_LIB)
 #ifeq必须顶格
 ifeq ($(TEST), $(wildcard $(TEST)))
 	@rm $(TEST)

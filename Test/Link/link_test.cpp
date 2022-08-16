@@ -7,7 +7,7 @@ void link_test(void)
 	Infra::CLink link;
 
 	{
-		for (int i = 0; i < 10; i++)
+		for (size_t i = 0; i < 10; i++)
 		{
 			link.rise((void*)(number+i));
 		}
@@ -15,7 +15,7 @@ void link_test(void)
 	}
 	{
 		printf("link.get() :");
-		for (int i = 0; i < link.linkSize(); i++)
+		for (size_t i = 0; i < link.linkSize(); i++)
 		{
 			void* p = link.get(i);
 			printf("%d ", *(int*)p);
@@ -27,7 +27,7 @@ void link_test(void)
 		link.reduce(&p);
 		printf("link.reduce(%p)=%d : ", p, *(int*)p);
 
-		for (int i = 0; i < link.linkSize(); i++)
+		for (size_t i = 0; i < link.linkSize(); i++)
 		{
 			void* p = link.get(i);
 			printf("%d ", *(int*)p);
@@ -39,7 +39,7 @@ void link_test(void)
 		link.insert(p, 1);
 		link.insert(p, 0);
 		link.insert(p, link.linkSize() - 1);
-		for (int i = 0; i < link.linkSize(); i++)
+		for (size_t i = 0; i < link.linkSize(); i++)
 		{
 			void* p = link.get(i);
 			printf("%d ", *(int*)p);
@@ -47,7 +47,7 @@ void link_test(void)
 		printf("\n");
 		printf("remove 0:");
 		link.remove(&p, 0);
-		for (int i = 0; i < link.linkSize(); i++)
+		for (size_t i = 0; i < link.linkSize(); i++)
 		{
 			void* p = link.get(i);
 			printf(" %d ", *(int*)p);
@@ -55,7 +55,7 @@ void link_test(void)
 		printf("\n");
 		printf("remove 1:");
 		link.remove(&p, 1);
-		for (int i = 0; i < link.linkSize(); i++)
+		for (size_t i = 0; i < link.linkSize(); i++)
 		{
 			void* p = link.get(i);
 			printf(" %d ", *(int*)p);
@@ -63,7 +63,7 @@ void link_test(void)
 		printf("\n");
 		printf("remove n-1:");
 		link.remove(&p, link.linkSize() - 1);
-		for (int i = 0; i < link.linkSize(); i++)
+		for (size_t i = 0; i < link.linkSize(); i++)
 		{
 			void* p = link.get(i);
 			printf(" %d ", *(int*)p);
@@ -81,7 +81,7 @@ void link_test(void)
 	}
 
 	{
-		for (int i = 0; i < 10; i++)
+		for (size_t i = 0; i < 10; i++)
 		{
 			link.rise((void*)(number+i));
 		}

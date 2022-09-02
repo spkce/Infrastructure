@@ -82,12 +82,12 @@ public:
 	{
 		if (m_type == typeMember)
 		{
-			m_func.memFunc.proc = NULL;
-			m_func.memFunc.obj = NULL;
+			m_func.memFunc.proc = nullptr;
+			m_func.memFunc.obj = nullptr;
 		}
 		else if (m_type == typePointer)
 		{
-			m_func.funcPtr = NULL;
+			m_func.funcPtr = nullptr;
 		}
 
 		m_type = typeEmpty;

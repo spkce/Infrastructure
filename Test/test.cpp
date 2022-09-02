@@ -8,6 +8,7 @@ extern void link_test(void);
 extern void callback_test(void);
 extern void timer_test(void);
 extern void MsgQueue_test(void);
+extern void exiter_test(void);
 
 int main()
 {
@@ -17,8 +18,8 @@ int main()
 	//Log_test();
 	//printf("****************thread_test***************\n");
 	//thread_test();
-	printf("****************threadPool_test***************\n");
-	threadPool_test();
+	//printf("****************threadPool_test***************\n");
+	//threadPool_test();
 	//printf("****************link_test***************\n");
 	//link_test();
 	
@@ -27,7 +28,8 @@ int main()
 	//timer_test();
 	//printf("**************MsgQueue_test***************\n");
 	//MsgQueue_test();
-
+	printf("**************exiter_test***************\n");
+	exiter_test();
 	return 0;
 }
 

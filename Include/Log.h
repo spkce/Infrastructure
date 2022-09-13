@@ -131,6 +131,10 @@ public:
 	
 	CLog* getLog(std::string name);
 	CLog* findLog(std::string name);
+	void setLevel(int lv);
+	void setType(int type);
+	void setColor(bool isOn);
+
 private:
 	Infra::CRwlock m_rwlock;
 	std::map<std::string, CLog*> m_mapLog;

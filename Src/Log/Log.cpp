@@ -216,5 +216,38 @@ CLog* CLogManager::findLog(std::string name)
 	
 	return iter->second;
 }
+
+void CLogManager::setLevel(int lv)
+{
+	m_rwlock.rLock();
+	for (std::map<std::string, CLog*>::iterator it = m_mapLog.begin(); it != m_mapLog.end(); it++)
+	{
+		CLog* p = it->second;
+		p->setLevel(lv);
+	}
+	m_rwlock.unLock();
+}
+
+void CLogManager::setType(int type)
+{
+	m_rwlock.rLock();
+	for (std::map<std::string, CLog*>::iterator it = m_mapLog.begin(); it != m_mapLog.end(); it++)
+	{
+		CLog* p = it->second;
+		p->setType(type);
+	}
+	m_rwlock.unLock();
+}
+
+void CLogManager::setColor(bool isOn)
+{
+	m_rwlock.rLock();
+	for (std::map<std::string, CLog*>::iterator it = m_mapLog.begin(); it != m_mapLog.end(); it++)
+	{
+		CLog* p = it->second;
+		p->setColor(isOn);
+	}
+	m_rwlock.unLock();
+}
 //void ex_info(const char* file, int line, const char* func, const char* fmt, ...)
 }//Infra

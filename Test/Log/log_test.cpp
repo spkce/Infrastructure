@@ -28,7 +28,15 @@ void Log_test(void)
 	inst.warning("#4 CLog %s %d\n", "&", 4);
 	inst.error("#5 CLog %s %d\n", "&", 5);
 
+	CLogManager::instance()->setLevel(CLog::logLevel_5);
+	CLogManager::instance()->setType(CLog::type_onlyLog);
+	CLogManager::instance()->setColor(true);
 
+	Info("logTest","#1 %s %d\n", "&", 1);
+	Debug("logTest","#2 %s %d\n", "&", 2);
+	Trace("logTest", "#3 %s %d\n", "&", 3);
+	Warning("logTest", "#4 %s %d\n", "&", 4);
+	Error("logTest", "#5 %s %d\n", "&", 5);
 	//printf("\033[40;35m""aaaaaaaaaaaaaaaaa""\033[0m\n");
 
 }

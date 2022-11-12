@@ -192,7 +192,9 @@ CLog* CLogManager::getLog(std::string name)
 	if (iter == m_mapLog.end())
 	{
 		m_rwlock.wLock();
-		CLog* p = new CLog(name, std::string(""), CLog::type_fileMsg);
+		CLog* p = new CLog(name, std::string(""), m_type);
+		p->setLevel(m_level);
+		p->setColor(m_isColorOn);
 		m_mapLog.insert(std::pair<std::string, CLog*>(name, p));
 		m_rwlock.unLock();
 		return p;
@@ -219,6 +221,7 @@ CLog* CLogManager::findLog(std::string name)
 
 void CLogManager::setLevel(int lv)
 {
+	m_level = lv;
 	m_rwlock.rLock();
 	for (std::map<std::string, CLog*>::iterator it = m_mapLog.begin(); it != m_mapLog.end(); it++)
 	{
@@ -230,6 +233,7 @@ void CLogManager::setLevel(int lv)
 
 void CLogManager::setType(int type)
 {
+	m_type = type;
 	m_rwlock.rLock();
 	for (std::map<std::string, CLog*>::iterator it = m_mapLog.begin(); it != m_mapLog.end(); it++)
 	{
@@ -241,6 +245,7 @@ void CLogManager::setType(int type)
 
 void CLogManager::setColor(bool isOn)
 {
+	m_isColorOn = isOn;
 	m_rwlock.rLock();
 	for (std::map<std::string, CLog*>::iterator it = m_mapLog.begin(); it != m_mapLog.end(); it++)
 	{

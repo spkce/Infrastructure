@@ -138,6 +138,9 @@ public:
 private:
 	Infra::CRwlock m_rwlock;
 	std::map<std::string, CLog*> m_mapLog;
+	int m_type;
+	int m_level;
+	bool m_isColorOn;
 };
 
 #define Info(name, fmt, ...) CLogManager::instance()->getLog(name)->_info(__FILE__, __LINE__, __FUNCTION__, (fmt), ## __VA_ARGS__)

@@ -1,6 +1,6 @@
 OBJS_PATH ?= ./obj
 LIBS ?= -lpthread -lrt
-INC ?= -I /mnt/d/source/Infrastructure/Include
+INC ?= -I ../Include
 TARGET ?= ./libInfra.a
 CC ?= gcc
 CXX ?= g++
@@ -8,7 +8,7 @@ AR ?= ar
 CFLAGS ?=
 MAKE_CFLAGS ?= --no-print-directory
 
-INC_INTERNAL := -I/mnt/d/source/Infrastructure/Src/Log
+INC_INTERNAL := -I./Log
 INC_INTERNAL +=  $(INC)
 
 SRC_DIR := $(shell ls -l | grep ^d | awk '{if($$9 != "obj") print $$9}')

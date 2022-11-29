@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <list>
 #include <memory>
 #include "LogInternal.h"

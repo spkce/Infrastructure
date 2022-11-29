@@ -27,7 +27,7 @@ checkdir:
 
 #生成静态库libInfra.a
 target:
-	@make $(MAKE_CFLAGS) OBJS_PATH="$(DIR_OBJ)" TARGET="$(TARGET)" LIBS="$(LIBS)" INC="$(INC)" -C Src
+	@make $(MAKE_CFLAGS) OBJS_PATH="$(DIR_OBJ)" TARGET="$(TARGET)" LIBS="$(LIBS)" -C Src
 
 #编译测试代码 # LIBS="-L$(DIR_LIB) $(LIBS) -lInfra"
 test:

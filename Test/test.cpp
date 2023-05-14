@@ -9,7 +9,7 @@ extern void callback_test(void);
 extern void timer_test(void);
 extern void MsgQueue_test(void);
 extern void exiter_test(void);
-
+extern void ByteBuffer_test();
 int main()
 {
 	//printf("***************packet_test*************\n");
@@ -28,8 +28,10 @@ int main()
 	//timer_test();
 	//printf("**************MsgQueue_test***************\n");
 	//MsgQueue_test();
-	printf("**************exiter_test***************\n");
-	exiter_test();
+	//printf("**************exiter_test***************\n");
+	//exiter_test();
+	printf("**************ByteBuffer_test***************\n");
+	ByteBuffer_test();
 	return 0;
 }
 

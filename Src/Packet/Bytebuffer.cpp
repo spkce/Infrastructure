@@ -69,7 +69,7 @@ void CByteBuffer::remove(int len)
 	}
 }
 
-void CByteBuffer::clear(unsigned int size)
+void CByteBuffer::clear()
 {
 	m_begin = 0;
 	m_end = 0;

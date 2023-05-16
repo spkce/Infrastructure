@@ -44,6 +44,11 @@ void CByteBuffer::resize(unsigned int size)
 
 void CByteBuffer::append(const unsigned char* p, unsigned int len)
 {
+	if (!p || len == 0)
+	{
+		return ;
+	}
+
 	if (len > m_capacity - m_end)
 	{
 		adjust(m_end - m_begin + len);
@@ -61,7 +66,7 @@ void CByteBuffer::remove(int len)
 		memset(m_pBuffer + pos, 0, m_end - pos);
 		m_end = pos;
 	}
-	else
+	else if (len < 0)
 	{
 		size_t pos = m_begin - len > m_end ? m_end : m_begin - len;
 		memset(m_pBuffer + m_begin, 0, pos - m_begin);

@@ -86,7 +86,7 @@ public:
 		type_modVer
 	};
 public:
-	CLog(std::string name, std::string ver, int type = type_onlyLog);
+	CLog(const std::string & name, const std::string & ver, int type = type_onlyLog);
 	~CLog();
 	int setLevel(int lv);
 	int setType(int type);
@@ -129,8 +129,10 @@ private:
 public:
 	static CLogManager* instance();
 	
-	CLog* getLog(std::string name);
-	CLog* findLog(std::string name);
+	CLog* getLog(const std::string &name);
+	CLog* findLog(const std::string &name);
+
+	bool setoutput(const std::string & file);
 	void setLevel(int lv);
 	void setType(int type);
 	void setColor(bool isOn);

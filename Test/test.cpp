@@ -14,8 +14,8 @@ int main()
 {
 	//printf("***************packet_test*************\n");
 	//packet_test();
-	//printf("****************Log_test***************\n");
-	//Log_test();
+	printf("****************Log_test***************\n");
+	Log_test();
 	//printf("****************thread_test***************\n");
 	//thread_test();
 	//printf("****************threadPool_test***************\n");
@@ -30,8 +30,8 @@ int main()
 	//MsgQueue_test();
 	//printf("**************exiter_test***************\n");
 	//exiter_test();
-	printf("**************ByteBuffer_test***************\n");
-	ByteBuffer_test();
+	//printf("**************ByteBuffer_test***************\n");
+	//ByteBuffer_test();
 	return 0;
 }
 

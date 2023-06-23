@@ -1,11 +1,77 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "execinfo.h"
+//#include <fstream> 
 #include "Log.h"
 #include <stdarg.h>
 
 namespace Infra
 {
+class CLogOut
+{
+	CLogOut() {}
+	virtual ~CLogOut() {}
+public:
+	static CLogOut* instance()
+	{
+		static CLogOut inst;
+		return &inst;
+	}
+
+	bool isInit()
+	{
+		bool ret = false;
+		m_rwlock.rLock();
+		ret = !m_file.empty();
+		m_rwlock.unLock();
+		return ret;
+	}
+	
+	bool init(const std::string & file)
+	{
+		if (!isInit())
+		{
+			m_rwlock.wLock();
+			if (m_file.empty())
+			{
+				m_file = file;
+				m_rwlock.unLock();
+				return true;
+			}
+			m_rwlock.unLock();
+			return true;
+		}
+
+		return false;
+	}
+
+	void stop()
+	{
+		m_rwlock.wLock();
+		m_file.clear();
+		m_rwlock.unLock();
+	}
+
+	void out(const char* buf, va_list args)
+	{
+		FILE* fp;
+		m_rwlock.rLock();
+		fp = fopen(m_file.c_str(), "a");
+		m_rwlock.unLock();
+		if (fp) 
+		{
+			vfprintf(fp, buf, args);
+			fflush(fp);
+			fclose(fp);
+		}
+	}
+private:
+	Infra::CRwlock m_rwlock;
+	std::string m_file;
+};
 
 void print_backtrace()
 {
@@ -16,6 +82,14 @@ void print_backtrace()
 	for (size_t i = 1; i < size; i++)
 	{
 		if (arry[i]) printf("%p \n", arry[i]);
+	}
+}
+
+inline void writelog(const char* buf, va_list args)
+{
+	if (CLogOut::instance()->isInit())
+	{
+		CLogOut::instance()->out(buf, args);
 	}
 }
 
@@ -52,6 +126,10 @@ do{																					\
 	va_start(args, (fmt));															\
 	printlog((fc), buffer, args);													\
 	va_end(args);																	\
+	va_list argvs;																	\
+	va_start(argvs, (fmt));															\
+	writelog(buffer, argvs);		\
+	va_end(argvs);																	\
 }while(0)																			\
 
 void exprintf(int fc, int bc, const char* fmt, ...)
@@ -74,9 +152,9 @@ void exprintf(int fc, const char* fmt, ...)
 	va_end(args);
 }
 
-CLog::CLog(std::string name, std::string ver, int type)
+CLog::CLog(const std::string & name, const std::string & ver, int type)
 :m_type(type)
-,m_level(logLevel_5)
+,m_level(logLevel_0)
 ,m_name(name)
 ,m_ver(ver)
 ,m_isColorOn(false)
@@ -160,6 +238,9 @@ void CLog::_error(const char* file, int line, const char* func, const char* fmt,
 
 
 CLogManager::CLogManager()
+:m_type(CLog::type_onlyLog)
+,m_level(CLog::logLevel_0)
+,m_isColorOn(false)
 {
 
 }
@@ -180,7 +261,7 @@ CLogManager* CLogManager::instance()
 	return &inst;
 }
 
-CLog* CLogManager::getLog(std::string name)
+CLog* CLogManager::getLog(const std::string & name)
 {
 	//Infra::CGuard<Infra::CMutex> guard(m_mutex);
 	std::map<std::string, CLog*>::iterator iter;
@@ -192,7 +273,7 @@ CLog* CLogManager::getLog(std::string name)
 	if (iter == m_mapLog.end())
 	{
 		m_rwlock.wLock();
-		CLog* p = new CLog(name, std::string(""), m_type);
+		CLog* p = new CLog(name, "", m_type);
 		p->setLevel(m_level);
 		p->setColor(m_isColorOn);
 		m_mapLog.insert(std::pair<std::string, CLog*>(name, p));
@@ -203,7 +284,7 @@ CLog* CLogManager::getLog(std::string name)
 	return iter->second;
 }
 
-CLog* CLogManager::findLog(std::string name)
+CLog* CLogManager::findLog(const std::string & name)
 {
 	std::map<std::string, CLog*>::iterator iter;
 	
@@ -217,6 +298,26 @@ CLog* CLogManager::findLog(std::string name)
 	}
 	
 	return iter->second;
+}
+
+bool CLogManager::setoutput(const std::string & file)
+{
+	if (!file.empty())
+	{
+		if ( !CLogOut::instance()->isInit())
+		{
+			return CLogOut::instance()->init(file);
+		}
+	}
+	else
+	{
+		if ( CLogOut::instance()->isInit())
+		{
+			CLogOut::instance()->stop();
+			return false;
+		}
+	}
+	return false;
 }
 
 void CLogManager::setLevel(int lv)

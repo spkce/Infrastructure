@@ -3,3 +3,4 @@
 test.out
 lib/libInfra.a
 obj/
+*.txt

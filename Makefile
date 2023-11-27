@@ -10,7 +10,7 @@ LIBS ?= -lpthread -lrt
 CC ?= gcc
 CXX ?= g++
 AR ?= ar
-CFLAGS ?= -Wall -DINFRA_LOG
+CFLAGS ?= -Wall -DINFRA_LOG -g
 MAKE_CFLAGS ?= --no-print-directory
 
 export CC CXX AR CFLAGS MAKE_CFLAGS

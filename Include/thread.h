@@ -7,6 +7,7 @@ namespace Infra
 
 struct MutexInternal;
 struct CondInternal;
+struct CondSignalInternal;
 struct RwlockInternal;
 struct ThreadInternal;
 
@@ -15,6 +16,7 @@ struct ThreadInternal;
 **/
 class CMutex
 {
+	friend class CCond;
 public:
 	CMutex();
 	virtual ~CMutex();
@@ -59,6 +61,21 @@ private:
 /**
 * @brief 条件变量
 **/
+class CCond
+{
+public:
+	CCond();
+	virtual ~CCond();
+
+	bool wait(CMutex & mutex);
+	bool signal();
+private:
+	struct CondInternal* m_pInternal;
+};
+
+/**
+* @brief 条件变量
+**/
 class CCondSignal
 {
 public:
@@ -75,7 +92,7 @@ public:
 	**/
 	bool signal();
 private:
-	struct CondInternal* m_pInternal;
+	struct CondSignalInternal* m_pInternal;
 };
 
 /**

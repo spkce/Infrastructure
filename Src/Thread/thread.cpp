@@ -58,12 +58,39 @@ bool CMutex::unlock()
 struct CondInternal
 {
 	pthread_cond_t cond;
+};
+
+CCond::CCond()
+{
+	m_pInternal = new CondInternal;
+	pthread_cond_init(&m_pInternal->cond, NULL);
+}
+
+CCond::~CCond()
+{
+	pthread_cond_destroy(&m_pInternal->cond);
+}
+
+bool CCond::wait(Infra::CMutex & mutex)
+{
+	struct MutexInternal* p = mutex.m_pInternal;
+	return pthread_cond_wait(&m_pInternal->cond, &p->mutex) == 0 ? true : false;
+}
+
+bool CCond::signal()
+{
+	return pthread_cond_signal(&m_pInternal->cond) == 0 ? true : false;
+}
+
+struct CondSignalInternal
+{
+	pthread_cond_t cond;
 	pthread_mutex_t mutex;
 };
 
 CCondSignal::CCondSignal()
 {
-	m_pInternal = new CondInternal();
+	m_pInternal = new CondSignalInternal();
 	pthread_mutex_init(&m_pInternal->mutex, NULL);
 	pthread_cond_init(&m_pInternal->cond, NULL);
 }
@@ -176,11 +203,11 @@ struct ThreadInternal
 {
 	pthread_t handle;
 	Infra::CMutex mutex;
-	Infra::CCondSignal cond;//用于线程的挂起
-	bool bLoop;				//线程执行体是否循环,由用户设置
-	bool bExit;				//线程执行体退出,由用户设置
-	bool bSuspend;			//线程暂停函数,由用户设置true,执行体设置false
-	bool isDestoryBlock;	//标示线程退出时是否以阻塞方式退出
+	Infra::CCond cond;		//用于线程的挂起
+	volatile bool bLoop;				//线程执行体是否循环,由用户设置
+	volatile bool bExit;				//线程执行体退出,由用户设置
+	volatile bool bSuspend;			//线程暂停函数,由用户设置true,执行体设置false
+	volatile bool isDestoryBlock;	//标示线程退出时是否以阻塞方式退出
 	int state;				//线程状态,由proc设置
 	IThread* owner;
 	
@@ -190,9 +217,9 @@ struct ThreadInternal
 
 void* ThreadInternal::proc(void* arg)
 {
-	bool isLoop = true;
-	bool isExit = false;
-	bool isSuspend = false;
+	volatile bool isLoop = true;
+	volatile bool isExit = false;
+	volatile bool isSuspend = false;
 	ThreadInternal* pInternal = (ThreadInternal*)arg;
 
 	InfraTrace("thread:%p proc run\n", pInternal);
@@ -204,23 +231,24 @@ void* ThreadInternal::proc(void* arg)
 		pInternal->mutex.lock();
 		isExit = pInternal->bExit;
 		isSuspend = pInternal->bSuspend;
-		pInternal->mutex.unlock();
 
 		if (isExit)
 		{
+			pInternal->mutex.unlock();
 			break;
 		}
-
-		if (isSuspend)
+		else if (isSuspend)
 		{
 			pInternal->state = THREAD_SUSPEND;
 			InfraTrace("thread:%p proc suspend\n", pInternal);
 			pInternal->cond.signal();
-			pInternal->cond.wait();
+			pInternal->cond.wait(pInternal->mutex);
+			pInternal->mutex.unlock();
 			InfraTrace("thread:%p proc suspend end\n", pInternal);
 			pInternal->state = THREAD_EXCUTE;
 			continue;
 		}
+		pInternal->mutex.unlock();
 		
 		if (pInternal->owner == NULL)
 		{
@@ -329,12 +357,15 @@ void CThread::run(bool isLoop)
 	m_pInternal->mutex.lock();
 	m_pInternal->bLoop = isLoop;
 	m_pInternal->bSuspend = false;
-	m_pInternal->mutex.unlock();
-
 	if (m_pInternal->state == THREAD_SUSPEND)
 	{
+		m_pInternal->mutex.unlock();
 		InfraTrace("thread:%p signal\n", m_pInternal);
 		m_pInternal->cond.signal();
+	}
+	else
+	{
+		m_pInternal->mutex.unlock();
 	}
 }
 
@@ -344,13 +375,22 @@ void CThread::suspend(bool isBlock)
 	{
 		m_pInternal->mutex.lock();
 		m_pInternal->bSuspend = true;
+		if (isBlock)
+		{
+			m_pInternal->cond.wait(m_pInternal->mutex);
+		}
 		m_pInternal->mutex.unlock();
 	}
-
-	if (isBlock)
+	else
 	{
-		m_pInternal->cond.wait();	
-	}	
+		if (isBlock)
+		{
+			m_pInternal->mutex.lock();
+			m_pInternal->cond.wait(m_pInternal->mutex);
+			m_pInternal->mutex.unlock();
+		}	
+	}
+
 }
 
 void CThread::pasue()
@@ -460,12 +500,14 @@ bool CThread::createTread(bool isBlock)
 		return false;
 	}
 
+	m_pInternal->mutex.lock();
 	m_pInternal->state = THREAD_READY;
 	if (isBlock)
 	{
 		InfraTrace("create pthread error\n");
-		m_pInternal->cond.wait();
+		m_pInternal->cond.wait(m_pInternal->mutex);
 	}
+	m_pInternal->mutex.unlock();
 	InfraTrace("create thread:%p isBlock: %d\n", m_pInternal, isBlock);
 	return true;
 }

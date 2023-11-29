@@ -67,9 +67,9 @@ public:
 	static unsigned long long getSystemTimeSecond();
 	//获取系统运行时间, 单位:毫秒
 	static unsigned long long getSystemTimeMSecond();
-	//获取进程运行时间, 单位:秒
+	//获取进程运行时间(不算休眠时间), 单位:秒
 	static unsigned long long getProcessTimeSecond();
-	//获取进程运行时间, 单位:毫秒
+	//获取进程运行时间(不算休眠时间), 单位:毫秒
 	static unsigned long long getProcessTimeMSecond();
 	//获取线程运行时间, 单位:秒
 	static unsigned long long getThreadTimeSecond();

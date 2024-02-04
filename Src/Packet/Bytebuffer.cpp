@@ -1,3 +1,4 @@
+#include <utility>
 #include "string.h"
 #include "ByteBuffer.h"
 
@@ -21,6 +22,26 @@ CByteBuffer::CByteBuffer(unsigned int size)
 	m_pBuffer = alloac(size);
 }
 
+CByteBuffer::CByteBuffer(const CByteBuffer & o)
+:m_begin(o.m_begin)
+,m_end(o.m_end)
+,m_capacity(o.m_capacity)
+{
+	m_pBuffer = alloac(o.m_capacity);
+	memcpy(m_pBuffer, o.m_pBuffer, m_capacity);
+}
+
+
+CByteBuffer::CByteBuffer(CByteBuffer && o)
+:m_begin(o.m_begin)
+,m_end(o.m_end)
+,m_capacity(o.m_capacity)
+,m_pBuffer(nullptr)
+{
+	std::swap(m_pBuffer, o.m_pBuffer);
+	o.clear();
+}
+
 CByteBuffer::~CByteBuffer()
 {
 	if (m_pBuffer)
@@ -28,6 +49,35 @@ CByteBuffer::~CByteBuffer()
 		delete[] m_pBuffer;
 		m_pBuffer = NULL;
 	}
+}
+
+CByteBuffer& CByteBuffer::operator=(const CByteBuffer &o)
+{
+	if (this != &o)
+	{
+		m_begin = o.m_begin;
+		m_end = o.m_end;
+		m_capacity = o.m_capacity;
+
+		m_pBuffer = alloac(o.m_capacity);
+		memcpy(m_pBuffer, o.m_pBuffer, m_capacity);
+	}
+	return *this;
+}
+
+CByteBuffer& CByteBuffer::operator=(CByteBuffer && o)
+{
+	if (this != &o)
+	{
+		m_begin = o.m_begin;
+		m_end = o.m_end;
+		m_capacity = o.m_capacity;
+		m_pBuffer = o.m_pBuffer;
+
+		o.m_pBuffer = nullptr;
+		o.clear();
+	}
+	return *this;
 }
 
 void CByteBuffer::resize(unsigned int size)
@@ -86,7 +136,7 @@ void CByteBuffer::clear()
 	}
 }
 
-const unsigned char* CByteBuffer::getBuffer()
+const unsigned char* CByteBuffer::getBuffer() const
 {
 	return m_pBuffer + m_begin;
 }

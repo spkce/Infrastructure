@@ -13,7 +13,15 @@ public:
 
 	CByteBuffer(unsigned int size);
 
-	~CByteBuffer();
+	CByteBuffer(const CByteBuffer & o);
+
+	CByteBuffer(CByteBuffer && o);
+
+	virtual ~CByteBuffer();
+
+	CByteBuffer& operator=(const CByteBuffer &o);
+
+	CByteBuffer& operator=(CByteBuffer && o);
 
 	void resize(unsigned int size);
 
@@ -23,7 +31,7 @@ public:
 
 	void clear();
 
-	const unsigned char *getBuffer();
+	const unsigned char *getBuffer() const;
 
 	unsigned int size() const;
 

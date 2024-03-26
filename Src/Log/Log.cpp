@@ -356,4 +356,31 @@ void CLogManager::setColor(bool isOn)
 	m_rwlock.unLock();
 }
 //void ex_info(const char* file, int line, const char* func, const char* fmt, ...)
+
+inline char i2digit(int n)
+{
+	return "0123456789abcdef"[n & 0x0f];
+}
+
+void printHex(const void* buf, size_t len, size_t bytes)
+{
+	const unsigned char* p = (const unsigned char*)buf;
+	for (int i = 0; i < len; i++)
+	{
+		if (i % bytes == 0)
+		{
+			if (i != 0)
+			{
+				printf("\n");
+			}
+			printf("%p : ", p + i);
+		}
+
+		char h = i2digit(p[i] >> 4);
+		char l = i2digit(p[i]);
+
+		printf("%c%c", h,l);
+	}
+	printf("\n");
+}
 }//Infra

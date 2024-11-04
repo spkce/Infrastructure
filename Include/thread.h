@@ -164,7 +164,7 @@ public:
 	* @param isBlock 是否以阻塞的方式创建线程。
 	* @return true:成功；false:失败
 	**/
-	bool createTread(bool isBlock = false);
+	bool createThread(bool isBlock = false);
 
 	/**
 	* @brief 线程开始运行
@@ -208,7 +208,11 @@ public:
 	* @brief 线程是否已经成功创建（createTread）
 	* @return true:已创建；false:未创建
 	**/
-	bool isTreadCreated() const;
+	bool isThreadCreated() const;
+
+	bool isRunning() const;
+
+	bool isExit() const;
 };
 
 } //Infra

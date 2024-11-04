@@ -121,7 +121,7 @@ CTimerManger::CTimerManger()
 	m_curTime = getCurTime();
 	
 	m_thread.attachProc(Infra::ThreadProc_t(&CTimerManger::thread_proc, this));
-	m_thread.createTread();
+	m_thread.createThread();
 	m_thread.run();
 }
 

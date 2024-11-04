@@ -14,10 +14,10 @@ int main()
 {
 	//printf("***************packet_test*************\n");
 	//packet_test();
-	printf("****************Log_test***************\n");
-	Log_test();
-	//printf("****************thread_test***************\n");
-	//thread_test();
+	//printf("****************Log_test***************\n");
+	//Log_test();
+	printf("****************thread_test***************\n");
+	thread_test();
 	//printf("****************threadPool_test***************\n");
 	//threadPool_test();
 	//printf("****************link_test***************\n");

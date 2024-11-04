@@ -4,7 +4,7 @@
 #include "stdio.h"
 #include <string.h>
 #include <errno.h>
-#include "link.h"
+//#include "link.h"
 #include "LogInternal.h"
 
 namespace Infra
@@ -196,7 +196,6 @@ enum
 	THREAD_SUSPEND,
 	THREAD_EXCUTE,
 	THREAD_WORK,
-	THREAD_EXIT,
 };
 
 struct ThreadInternal
@@ -253,7 +252,7 @@ void* ThreadInternal::proc(void* arg)
 		if (pInternal->owner == NULL)
 		{
 			InfraTrace("thread:%p IThread Error\n", pInternal);
-			pInternal->state = THREAD_EXIT;
+			pInternal->state = THREAD_INIT;
 			return NULL;
 		}
 
@@ -276,7 +275,7 @@ void* ThreadInternal::proc(void* arg)
 		pInternal->mutex.unlock();
 	} while (isLoop);
 	
-	pInternal->state = THREAD_EXIT;
+	pInternal->state = THREAD_INIT;
 	
 	InfraTrace("thread:%p proc exit\n", pInternal);
 
@@ -350,7 +349,7 @@ CThread::~CThread()
 void CThread::run(bool isLoop)
 {
 	InfraTrace("thread:%p isLoop: %d\n", m_pInternal, isLoop);
-	if (m_pInternal->state == THREAD_EXIT)
+	if (m_pInternal->state == THREAD_INIT)
 	{
 		return ;
 	}
@@ -408,7 +407,7 @@ void CThread::pasue()
 bool CThread::stop(bool isBlock)
 {
 	InfraTrace("thread:%p isBlock:%d\n", m_pInternal, isBlock);
-	if (m_pInternal->state == THREAD_INIT || m_pInternal->state == THREAD_EXIT)
+	if (m_pInternal->state == THREAD_INIT)
 	{
 		return false;
 	}
@@ -425,7 +424,7 @@ bool CThread::stop(bool isBlock)
 		return true;
 	}
 
-	if (m_pInternal->state == THREAD_SUSPEND || m_pInternal->state == THREAD_READY)
+	if (m_pInternal->state == THREAD_SUSPEND)
 	{
 		InfraTrace("thread:%p signal\n", m_pInternal);
 		m_pInternal->cond.signal();
@@ -446,7 +445,7 @@ bool CThread::attachProc(const ThreadProc_t & proc)
 {
 	if (m_pInternal->state == THREAD_EXCUTE 
 		|| m_pInternal->state == THREAD_WORK
-		|| m_pInternal->state == THREAD_EXIT)
+		)
 	{
 		return false;
 	}
@@ -464,7 +463,7 @@ bool CThread::detachProc(const ThreadProc_t & proc)
 {
 	if (m_pInternal->state == THREAD_EXCUTE 
 		|| m_pInternal->state == THREAD_WORK
-		|| m_pInternal->state == THREAD_EXIT)
+		)
 	{
 		return false;
 	}
@@ -478,15 +477,15 @@ bool CThread::detachProc(const ThreadProc_t & proc)
 	return false;
 }
 
-bool CThread::isTreadCreated() const
+bool CThread::isThreadCreated() const
 {
 	return m_pInternal->state >= THREAD_READY;
 }
 
 
-bool CThread::createTread(bool isBlock)
+bool CThread::createThread(bool isBlock)
 {
-	if (isTreadCreated())
+	if (isThreadCreated())
 	{
 		//线程已经运行
 		return false;
@@ -495,12 +494,17 @@ bool CThread::createTread(bool isBlock)
 	if (create(m_pInternal, false))
 	{
 		//线程创建失败
-		m_pInternal->state = THREAD_EXIT;
+		m_pInternal->state = THREAD_INIT;
 		InfraTrace("create pthread error\n");
 		return false;
 	}
 
 	m_pInternal->mutex.lock();
+	m_pInternal->bLoop = false;
+	m_pInternal->bExit = false;
+	m_pInternal->bSuspend = true;
+	m_pInternal->owner = this;
+	m_pInternal->isDestoryBlock = true;
 	m_pInternal->state = THREAD_READY;
 	if (isBlock)
 	{
@@ -512,4 +516,8 @@ bool CThread::createTread(bool isBlock)
 	return true;
 }
 
+bool CThread::isExit() const
+{
+	return m_pInternal->state == THREAD_INIT;
+}
 }//Infra

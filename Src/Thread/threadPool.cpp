@@ -33,24 +33,24 @@ private:
 	bool init();
 
 public:
-	//Ïß³Ì¾ä±ú
+	//çº¿ç¨‹å¥æŸ„
 	pthread_t m_handle;
 	
-	//ÓÃÓÚÏß³ÌµÄ¹ÒÆð
+	//ç”¨äºŽçº¿ç¨‹çš„æŒ‚èµ·
 	CCondSignal m_spndCond;
-	//ÓÃÓÚÍ¨ÖªÏß³Ì½øÈëºÍÍË³ö
+	//ç”¨äºŽé€šçŸ¥çº¿ç¨‹è¿›å…¥å’Œé€€å‡º
 	CCondSignal m_procCond;
 
-	//Ïß³Ì¿ØÖÆ±êÖ¾Î»£¬m_rwlock±£»¤£¬excute¡¢suspend¡¢workÖÐ¿É¸ü¸Ä
+	//çº¿ç¨‹æŽ§åˆ¶æ ‡å¿—ä½ï¼Œm_rwlockä¿æŠ¤ï¼Œexcuteã€suspendã€workä¸­å¯æ›´æ”¹
 	CRwlock m_rwlock;
-	bool m_bExit;				//Ïß³ÌÖ´ÐÐÌåÍË³ö
-	bool m_bSuspend;			//Ïß³ÌÔÝÍ£º¯Êý
+	bool m_bExit;				//çº¿ç¨‹æ‰§è¡Œä½“é€€å‡º
+	bool m_bSuspend;			//çº¿ç¨‹æš‚åœå‡½æ•°
 
-	//Ïß³ÌÓµÓÐÕß
+	//çº¿ç¨‹æ‹¥æœ‰è€…
 	void* m_owner;
 
 private:
-	//Ïß³Ì×´Ì¬ ÓÉprocº¯ÊýÖÐÉèÖÃ
+	//çº¿ç¨‹çŠ¶æ€ ç”±procå‡½æ•°ä¸­è®¾ç½®
 	int m_state;
 };
 
@@ -63,7 +63,7 @@ CThreadCore::CThreadCore()
 {
 	if (init())
 	{
-		//µÈ´ýCThreadCore::proc¿ªÊ¼Ö´ÐÐ
+		//ç­‰å¾…CThreadCore::procå¼€å§‹æ‰§è¡Œ
 		m_procCond.wait();
 	}
 }
@@ -94,7 +94,7 @@ void* CThreadCore::proc(void* arg)
 
 	pCore->m_procCond.signal();
 	InfraTrace("thread:%p ready\n", pCore);
-	pCore->m_state = THREAD_SUSPEND; //Ä¬ÈÏ³õÊ¼×´Ì¬Îª¹ÒÆð
+	pCore->m_state = THREAD_SUSPEND; //é»˜è®¤åˆå§‹çŠ¶æ€ä¸ºæŒ‚èµ·
 	pCore->m_spndCond.wait();
 	pCore->m_state = THREAD_EXCUTE;
 	InfraTrace("thread:%p start\n", pCore);
@@ -165,7 +165,7 @@ bool CThreadCore::init()
 	int err = pthread_create(&m_handle, NULL, (void*(*)(void*))&CThreadCore::proc, (void*)this);
 	if (err)
 	{
-		//Ïß³Ì´´½¨Ê§°Ü
+		//çº¿ç¨‹åˆ›å»ºå¤±è´¥
 		InfraTrace("create pthread error: %d\n",err);
 		return false;
 	}
@@ -287,7 +287,7 @@ bool CPoolThread::run()
 	
 	if (m_threadCore->getState() == CThreadCore::THREAD_INIT)
 	{
-		//Èôm_threadCore¸Õ´´½¨»¹Ã»ÓÐ¾ÍÐ÷£¬µÈ´ý300ms
+		//è‹¥m_threadCoreåˆšåˆ›å»ºè¿˜æ²¡æœ‰å°±ç»ªï¼Œç­‰å¾…300ms
 		CTime::delay_ms(100);
 		if (m_threadCore->getState() == CThreadCore::THREAD_INIT)
 		{
